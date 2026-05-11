@@ -1,23 +1,12 @@
 import { NextResponse } from 'next/server'
 
-const PASSWORD     = process.env.ADMIN_PASSWORD
+const PASSWORD      = process.env.ADMIN_PASSWORD
 const COOKIE_SECRET = process.env.ADMIN_COOKIE_SECRET ?? 'fallback_secret'
 
-// Simple HMAC-free token: base64(secret + ":" + timestamp)
-// Good enough for a single-admin site — not a bank
+// Simple token: base64(secret + ":" + timestamp)
 function makeToken() {
   const payload = `${COOKIE_SECRET}:${Date.now()}`
   return Buffer.from(payload).toString('base64')
-}
-
-export function validateToken(token) {
-  try {
-    const decoded = Buffer.from(token, 'base64').toString('utf8')
-    const [secret] = decoded.split(':')
-    return secret === COOKIE_SECRET
-  } catch {
-    return false
-  }
 }
 
 export async function POST(request) {
