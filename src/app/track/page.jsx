@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import OrderTracker from '@/components/OrderTracker'
 import { ArrowLeft } from 'lucide-react'
 
@@ -39,7 +40,9 @@ export default function TrackPage() {
           </p>
         </div>
 
-        <OrderTracker />
+        <Suspense fallback={<div className="h-32 bg-[#1C1C1C] animate-pulse rounded" />}>
+          <OrderTracker />
+        </Suspense>
       </div>
     </div>
   )
