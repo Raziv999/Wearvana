@@ -308,9 +308,14 @@ export default function AdminDashboard() {
                         onRefresh={fetchProducts}
                         onDelete={async () => {
                           if (!confirm(`Delete "${selectedProduct.name}"?`)) return
-                          await fetch(`${API}/api/products/${selectedProduct._id}`, { method: 'DELETE' })
-                          setSelectedProduct(null)
-                          fetchProducts()
+                          try {
+                            const res = await fetch(`${API}/api/products/${selectedProduct._id}`, { method: 'DELETE' })
+                            if (!res.ok) throw new Error('Failed')
+                            setSelectedProduct(null)
+                            fetchProducts()
+                          } catch {
+                            alert('Delete failed — backend may be waking up, try again in 30 seconds.')
+                          }
                         }}
                       />
                     </div>
