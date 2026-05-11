@@ -359,10 +359,8 @@ export default function AdminDashboard() {
           onSaved={(saved) => {
             setShowProductForm(false)
             setEditingProduct(null)
-            // Keep the detail panel open and show updated data
-            if (selectedProduct && saved._id === selectedProduct._id) {
-              setSelectedProduct(saved)
-            }
+            // Auto-select the saved product in the detail panel
+            setSelectedProduct(saved)
             fetchProducts()
           }}
         />
