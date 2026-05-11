@@ -1,0 +1,46 @@
+{
+  "name": "Wearvana",
+  "short_name": "Wearvana",
+  "description": "Exclusive sneakers & New Era caps in Nepal. Pre-order only.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0A0A",
+  "theme_color": "#C0231E",
+  "orientation": "portrait-primary",
+  "categories": ["shopping", "lifestyle"],
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/og-image.jpg",
+      "sizes": "1200x630",
+      "type": "image/jpeg",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Sneakers",
+      "url": "/#sneakers",
+      "description": "Browse sneaker drops"
+    },
+    {
+      "name": "Caps",
+      "url": "/#caps",
+      "description": "Browse New Era caps"
+    }
+  ]
+}
