@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react'
 
 const BADGE_STYLES = {
   HOT:            'bg-[#C0231E] text-white',
@@ -19,10 +19,18 @@ export default function ProductGallery({ product, gradient, accent }) {
     .filter((src, i, arr) => arr.indexOf(src) === i)
 
   const [activeIdx, setActiveIdx] = useState(0)
+  const [zoomed, setZoomed]       = useState(false)
   const active   = allImages[activeIdx] ?? null
   const hasMany  = allImages.length > 1
 
   const touchStartX = useRef(null)
+
+  // Close zoom on Escape
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') setZoomed(false) }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
 
   const prev = () => setActiveIdx(i => (i - 1 + allImages.length) % allImages.length)
   const next = () => setActiveIdx(i => (i + 1) % allImages.length)
@@ -47,15 +55,23 @@ export default function ProductGallery({ product, gradient, accent }) {
         onTouchEnd={onTouchEnd}
       >
         {active ? (
-          <Image
-            key={active}
-            src={active}
-            alt={`${product.name} — photo ${activeIdx + 1}`}
-            fill
-            className="object-contain transition-opacity duration-300"
-            sizes="(max-width: 768px) 100vw, 55vw"
-            priority={activeIdx === 0}
-          />
+          <>
+            <Image
+              key={active}
+              src={active}
+              alt={`${product.name} — photo ${activeIdx + 1}`}
+              fill
+              className="object-contain transition-opacity duration-300 cursor-zoom-in"
+              sizes="(max-width: 768px) 100vw, 55vw"
+              priority={activeIdx === 0}
+              onClick={() => setZoomed(true)}
+            />
+            {/* Zoom hint — desktop only */}
+            <div className="absolute bottom-3 right-3 hidden md:flex items-center gap-1.5 bg-black/60 text-white/70 font-body text-[9px] tracking-widest uppercase px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+              <ZoomIn size={10} />
+              Click to zoom
+            </div>
+          </>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
             <div
@@ -110,7 +126,7 @@ export default function ProductGallery({ product, gradient, accent }) {
             LIMITED
           </span>
         )}
-        {product.slotsRemaining !== null && product.slotsRemaining <= 5 && (
+        {product.slotsRemaining !== null && product.slotsRemaining > 0 && product.slotsRemaining <= 5 && (
           <div className="absolute bottom-0 left-0 right-0 bg-[#C0231E]/90 py-2 text-center z-10">
             <p className="font-body text-[10px] text-white font-bold tracking-[0.15em] uppercase">
               Only {product.slotsRemaining} slots left
@@ -155,6 +171,70 @@ export default function ProductGallery({ product, gradient, accent }) {
               className={`w-1.5 h-1.5 rounded-full transition-all ${i === activeIdx ? 'bg-[#C0231E] w-4' : 'bg-[#383838]'}`}
             />
           ))}
+        </div>
+      )}
+
+      {/* ── Lightbox / zoom overlay ── */}
+      {zoomed && active && (
+        <div
+          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
+          onClick={() => setZoomed(false)}
+        >
+          {/* Close button */}
+          <button
+            onClick={() => setZoomed(false)}
+            className="absolute top-4 right-4 text-white/60 hover:text-white transition-colors z-10"
+            aria-label="Close zoom"
+          >
+            <X size={28} />
+          </button>
+
+          {/* Counter */}
+          {hasMany && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 font-body text-white/40 text-xs tracking-widest">
+              {activeIdx + 1} / {allImages.length}
+            </div>
+          )}
+
+          {/* Image */}
+          <div
+            className="relative w-full max-w-2xl"
+            style={{ aspectRatio: '1 / 1' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <Image
+              src={active}
+              alt={`${product.name} zoom`}
+              fill
+              className="object-contain"
+              sizes="100vw"
+              priority
+            />
+          </div>
+
+          {/* Prev / Next in lightbox */}
+          {hasMany && (
+            <>
+              <button
+                onClick={(e) => { e.stopPropagation(); prev() }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                aria-label="Previous"
+              >
+                <ChevronLeft size={22} className="text-white" />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); next() }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                aria-label="Next"
+              >
+                <ChevronRight size={22} className="text-white" />
+              </button>
+            </>
+          )}
+
+          <p className="absolute bottom-5 left-1/2 -translate-x-1/2 font-body text-white/30 text-[10px] tracking-widest uppercase">
+            Tap outside to close
+          </p>
         </div>
       )}
     </div>

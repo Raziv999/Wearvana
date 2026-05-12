@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { X, Loader2, RefreshCw, ChevronDown } from 'lucide-react'
+import { useState, useEffect, useRef, useId } from 'react'
+import { X, Loader2, RefreshCw, ChevronDown, Images } from 'lucide-react'
 import ImageUploader from './ImageUploader'
 
 const API = process.env.NEXT_PUBLIC_API_URL
@@ -80,6 +80,35 @@ export default function ProductFormModal({ product, onClose, onSaved }) {
   const setGallery  = (i, url) => setForm(f => {
     const imgs = [...f.images]; imgs[i] = url; return { ...f, images: imgs }
   })
+
+  // Bulk gallery upload — upload multiple files at once to Cloudinary
+  const bulkInputId = useId()
+  const [bulkUploading, setBulkUploading] = useState(false)
+  const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+  const PRESET     = process.env.NEXT_PUBLIC_CLOUDINARY_PRESET
+
+  const handleBulkUpload = async (e) => {
+    const files = Array.from(e.target.files ?? []).slice(0, 4)
+    if (!files.length) return
+    setBulkUploading(true)
+    const urls = await Promise.all(files.map(async (file) => {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('upload_preset', PRESET)
+      try {
+        const res  = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: fd })
+        const data = await res.json()
+        return res.ok ? data.secure_url : ''
+      } catch { return '' }
+    }))
+    setForm(f => {
+      const imgs = [...f.images]
+      urls.forEach((url, i) => { if (url) imgs[i] = url })
+      return { ...f, images: imgs }
+    })
+    setBulkUploading(false)
+    e.target.value = ''
+  }
 
   const handleSlugChange = (e) => {
     setSlugEdited(true)
@@ -207,7 +236,33 @@ export default function ProductFormModal({ product, onClose, onSaved }) {
               />
             </div>
 
-            {/* Gallery row — 4 equal thumbnails */}
+            {/* Gallery row — 4 equal thumbnails + bulk upload */}
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="font-body text-[8px] text-[#383838] tracking-widest uppercase">
+                Gallery Photos (up to 4)
+              </p>
+              <label
+                htmlFor={bulkInputId}
+                className={`flex items-center gap-1.5 font-body text-[8px] tracking-widest uppercase cursor-pointer transition-colors ${
+                  bulkUploading ? 'text-[#525252]' : 'text-[#525252] hover:text-[#C0231E]'
+                }`}
+              >
+                {bulkUploading
+                  ? <Loader2 size={10} className="animate-spin" />
+                  : <Images size={10} />
+                }
+                {bulkUploading ? 'Uploading…' : 'Upload All at Once'}
+              </label>
+              <input
+                id={bulkInputId}
+                type="file"
+                accept="image/*"
+                multiple
+                className="sr-only"
+                onChange={handleBulkUpload}
+                disabled={bulkUploading}
+              />
+            </div>
             <div className="grid grid-cols-4 gap-2">
               {form.images.map((src, i) => (
                 <ImageUploader
