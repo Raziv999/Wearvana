@@ -13,6 +13,8 @@ connectDB()
 // and any Vercel preview URLs.
 const ALLOWED_ORIGINS = [
   process.env.CLIENT_URL || 'http://localhost:3000',
+  'https://getwearvana.com',
+  'https://www.getwearvana.com',
   'https://wearvana.com',
   'https://www.wearvana.com',
 ]
