@@ -10,6 +10,12 @@ const BRANDS    = ['NIKE', 'JORDAN', 'ADIDAS', 'NEW BALANCE', 'NEW ERA', 'ON RUN
 const CATEGORIES = ['sneakers', 'running', 'caps']
 const BADGES    = ['', 'HOT', 'NEW', 'SELLING FAST', 'ICONIC']
 
+const SNEAKER_SIZES = [
+  'US 6', 'US 6.5', 'US 7', 'US 7.5', 'US 8', 'US 8.5',
+  'US 9', 'US 9.5', 'US 10', 'US 10.5', 'US 11', 'US 11.5', 'US 12', 'US 13',
+]
+const CAP_SIZES = ['S/M', 'L/XL', 'One Size']
+
 const JORDAN_SUBCATEGORIES = [
   '', 'Jordan 1 Low', 'Jordan 1 Mid', 'Jordan 1 High',
   'Air Jordan 4', 'Air Jordan 3', 'Air Jordan 5',
@@ -31,6 +37,7 @@ const EMPTY = {
   image: '', images: ['', '', '', ''],
   badge: '', limited: false, available: true,
   slotsRemaining: '', slug: '',
+  soldSizes: [], videoUrl: '',
 }
 
 export default function ProductFormModal({ product, onClose, onSaved }) {
@@ -60,6 +67,8 @@ export default function ProductFormModal({ product, onClose, onSaved }) {
         available:      product.available      ?? true,
         slotsRemaining: product.slotsRemaining ?? '',
         slug:           product.slug           ?? '',
+        soldSizes:      product.soldSizes      ?? [],
+        videoUrl:       product.videoUrl       ?? '',
       })
       setSlugEdited(true)
     }
@@ -150,6 +159,8 @@ export default function ProductFormModal({ product, onClose, onSaved }) {
       subcategory:    form.subcategory === '' ? null : form.subcategory,
       image:          form.image.trim() || '',
       images:         form.images.map(s => s.trim()).filter(Boolean),
+      soldSizes:      form.soldSizes,
+      videoUrl:       form.videoUrl.trim(),
     }
 
     setLoading(true)
@@ -410,6 +421,70 @@ export default function ProductFormModal({ product, onClose, onSaved }) {
               {form.slug && (
                 <p className="font-body text-[#383838] text-[9px] mt-1 truncate">
                   getwearvana.com/product/<span className="text-[#525252]">{form.slug}</span>
+                </p>
+              )}
+            </div>
+
+            {/* Sold Sizes */}
+            {form.category !== 'caps' && (
+              <div>
+                <label className="field-label">
+                  Sold-Out Sizes
+                  <span className="ml-1 opacity-50 normal-case">(greyed out on product page)</span>
+                </label>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {SNEAKER_SIZES.map((size) => {
+                    const sold = form.soldSizes.includes(size)
+                    return (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => setForm(f => ({
+                          ...f,
+                          soldSizes: sold
+                            ? f.soldSizes.filter(s => s !== size)
+                            : [...f.soldSizes, size],
+                        }))}
+                        className={`font-body text-[10px] tracking-wide px-2.5 py-1.5 border transition-all duration-100 ${
+                          sold
+                            ? 'bg-[#C0231E]/20 border-[#C0231E]/60 text-[#C0231E] line-through'
+                            : 'border-[#242424] text-[#525252] hover:border-[#525252] hover:text-[#F4F4F4]'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    )
+                  })}
+                </div>
+                {form.soldSizes.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, soldSizes: [] }))}
+                    className="font-body text-[9px] text-[#525252] hover:text-[#C0231E] tracking-widest uppercase mt-1.5 transition-colors"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Video URL */}
+            <div>
+              <label className="field-label">
+                Video URL
+                <span className="ml-1 opacity-50 normal-case">(YouTube or .mp4 — optional)</span>
+              </label>
+              <input
+                type="url"
+                value={form.videoUrl}
+                onChange={set('videoUrl')}
+                placeholder="https://www.youtube.com/watch?v=..."
+                className="field-input"
+                autoComplete="off"
+              />
+              {form.videoUrl && (
+                <p className="font-body text-[#383838] text-[9px] mt-1">
+                  Video will appear as an extra tab on the product page gallery.
                 </p>
               )}
             </div>

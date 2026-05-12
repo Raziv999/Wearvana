@@ -164,14 +164,44 @@ const PRICE_RANGES = [
 export default function FilterableGrid({ products }) {
   const [open, setOpen]         = useState(false)
   const [search, setSearch]     = useState('')
+  const [showSuggestions, setShowSuggestions] = useState(false)
   const [hoveredBrand, setHoveredBrand] = useState('ALL')
   const [active, setActive]     = useState({ type: 'shopby', index: 0 })
   const [priceIdx, setPriceIdx] = useState(0)   // index into PRICE_RANGES
-  const panelRef = useRef(null)
-  const btnRef   = useRef(null)
+  const panelRef  = useRef(null)
+  const btnRef    = useRef(null)
+  const searchRef = useRef(null)
 
   // Available brands from actual products
   const availableBrands = useMemo(() => new Set(products.map(p => p.brand)), [products])
+
+  // Autocomplete suggestions
+  const suggestions = useMemo(() => {
+    if (!search.trim() || search.length < 2) return []
+    const q = search.toLowerCase()
+    const seen = new Set()
+    const results = []
+    for (const p of products) {
+      const label = `${p.brand} ${p.name}`
+      if (label.toLowerCase().includes(q) && !seen.has(label)) {
+        seen.add(label)
+        results.push({ label, slug: p.slug || p._id, image: p.image })
+        if (results.length >= 5) break
+      }
+    }
+    return results
+  }, [products, search])
+
+  // Hide suggestions on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
 
   // Close on outside click
   useEffect(() => {
@@ -264,20 +294,52 @@ export default function FilterableGrid({ products }) {
 
       {/* ── Top bar ── */}
       <div className="flex items-center gap-3 mb-6">
-        {/* Search */}
-        <div className="relative flex-1 max-w-xs">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#383838] pointer-events-none" />
+        {/* Search with autocomplete */}
+        <div ref={searchRef} className="relative flex-1 max-w-xs">
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#383838] pointer-events-none z-10" />
           <input
             type="text"
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => { setSearch(e.target.value); setShowSuggestions(true) }}
+            onFocus={() => setShowSuggestions(true)}
+            onKeyDown={e => { if (e.key === 'Escape') setShowSuggestions(false) }}
             placeholder="Search drops…"
             className="w-full bg-[#111111] border border-[#242424] text-[#F4F4F4] font-body text-xs pl-9 pr-8 py-2.5 placeholder-[#383838] focus:outline-none focus:border-[#C0231E]/60 transition-colors"
+            autoComplete="off"
           />
           {search && (
-            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#525252] hover:text-[#F4F4F4]">
+            <button
+              onClick={() => { setSearch(''); setShowSuggestions(false) }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#525252] hover:text-[#F4F4F4] z-10"
+            >
               <X size={11} />
             </button>
+          )}
+
+          {/* Autocomplete dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-[#111111] border border-[#242424] shadow-2xl shadow-black/60 z-40 overflow-hidden">
+              {suggestions.map((s) => (
+                <button
+                  key={s.slug}
+                  onMouseDown={(e) => {
+                    e.preventDefault()
+                    setSearch(s.label)
+                    setShowSuggestions(false)
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-[#1C1C1C] transition-colors group"
+                >
+                  {s.image && s.image.startsWith('http') ? (
+                    <img src={s.image} alt="" className="w-8 h-8 object-contain opacity-70 group-hover:opacity-100 shrink-0" />
+                  ) : (
+                    <div className="w-8 h-8 bg-[#1C1C1C] shrink-0" />
+                  )}
+                  <span className="font-body text-xs text-[#909090] group-hover:text-[#F4F4F4] transition-colors truncate">
+                    {s.label}
+                  </span>
+                </button>
+              ))}
+            </div>
           )}
         </div>
 

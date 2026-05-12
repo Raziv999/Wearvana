@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import ProductPageClient from '@/components/ProductPageClient'
+import RecentlyViewed from '@/components/RecentlyViewed'
 
 const BASE_URL = 'https://getwearvana.com'
 const FALLBACK_IMAGE = `${BASE_URL}/og-image.jpg`
@@ -143,12 +144,12 @@ export default async function ProductPage({ params }) {
 
   return (
     <>
-      {/* Prompt 2: JSON-LD injected in page body — no hydration issues */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <ProductPageClient product={product} />
+      <RecentlyViewed currentProductId={product._id} product={product} />
     </>
   )
 }

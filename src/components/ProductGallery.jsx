@@ -2,7 +2,19 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
-import { ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X, ZoomIn, Play } from 'lucide-react'
+
+// Extract YouTube video ID from various URL formats
+function getYouTubeId(url) {
+  if (!url) return null
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)
+  return match ? match[1] : null
+}
+
+// Check if URL is a direct video file
+function isDirectVideo(url) {
+  return /\.(mp4|webm|ogg)(\?.*)?$/i.test(url)
+}
 
 const BADGE_STYLES = {
   HOT:            'bg-[#C0231E] text-white',
@@ -18,10 +30,15 @@ export default function ProductGallery({ product, gradient, accent }) {
     .filter(Boolean)
     .filter((src, i, arr) => arr.indexOf(src) === i)
 
-  const [activeIdx, setActiveIdx] = useState(0)
-  const [zoomed, setZoomed]       = useState(false)
+  const [activeIdx, setActiveIdx]   = useState(0)
+  const [videoActive, setVideoActive] = useState(false)
+  const [zoomed, setZoomed]         = useState(false)
   const active   = allImages[activeIdx] ?? null
-  const hasMany  = allImages.length > 1
+  const hasVideo = Boolean(product.videoUrl)
+  const hasMany  = allImages.length > 1 || hasVideo
+
+  const ytId      = hasVideo ? getYouTubeId(product.videoUrl) : null
+  const directVid = hasVideo && !ytId && isDirectVideo(product.videoUrl)
 
   const touchStartX = useRef(null)
 
@@ -32,8 +49,8 @@ export default function ProductGallery({ product, gradient, accent }) {
     return () => window.removeEventListener('keydown', handler)
   }, [])
 
-  const prev = () => setActiveIdx(i => (i - 1 + allImages.length) % allImages.length)
-  const next = () => setActiveIdx(i => (i + 1) % allImages.length)
+  const prev = () => { setVideoActive(false); setActiveIdx(i => (i - 1 + allImages.length) % allImages.length) }
+  const next = () => { setVideoActive(false); setActiveIdx(i => (i + 1) % allImages.length) }
 
   // Touch/swipe support
   const onTouchStart = (e) => { touchStartX.current = e.touches[0].clientX }
@@ -54,7 +71,29 @@ export default function ProductGallery({ product, gradient, accent }) {
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        {active ? (
+        {videoActive && hasVideo ? (
+          /* ── Video player ── */
+          ytId ? (
+            <iframe
+              src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="absolute inset-0 w-full h-full"
+              title={`${product.name} video`}
+            />
+          ) : directVid ? (
+            <video
+              src={product.videoUrl}
+              controls
+              autoPlay
+              className="absolute inset-0 w-full h-full object-contain"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <p className="font-body text-[#525252] text-xs">Unsupported video format</p>
+            </div>
+          )
+        ) : active ? (
           <>
             <Image
               key={active}
@@ -88,8 +127,8 @@ export default function ProductGallery({ product, gradient, accent }) {
           </div>
         )}
 
-        {/* Prev / Next arrows — always visible on mobile, hover on desktop */}
-        {hasMany && (
+        {/* Prev / Next arrows — only shown for images, not video */}
+        {!videoActive && hasMany && (
           <>
             <button
               onClick={prev}
@@ -109,7 +148,7 @@ export default function ProductGallery({ product, gradient, accent }) {
         )}
 
         {/* Photo counter — top right */}
-        {hasMany && (
+        {!videoActive && hasMany && allImages.length > 1 && (
           <div className="absolute top-3 right-3 bg-black/70 font-body text-white text-[9px] tracking-widest px-2 py-1 z-10">
             {activeIdx + 1} / {allImages.length}
           </div>
@@ -141,10 +180,10 @@ export default function ProductGallery({ product, gradient, accent }) {
           {allImages.map((src, i) => (
             <button
               key={src + i}
-              onClick={() => setActiveIdx(i)}
+              onClick={() => { setVideoActive(false); setActiveIdx(i) }}
               aria-label={`View photo ${i + 1}`}
               className={`relative shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden border-2 transition-all duration-150 ${
-                i === activeIdx
+                !videoActive && i === activeIdx
                   ? 'border-[#C0231E] opacity-100'
                   : 'border-[#1C1C1C] opacity-50 hover:opacity-80 hover:border-[#525252]'
               }`}
@@ -158,6 +197,30 @@ export default function ProductGallery({ product, gradient, accent }) {
               />
             </button>
           ))}
+
+          {/* Video thumbnail */}
+          {hasVideo && (
+            <button
+              onClick={() => setVideoActive(true)}
+              aria-label="Watch video"
+              className={`relative shrink-0 w-16 h-16 md:w-20 md:h-20 overflow-hidden border-2 transition-all duration-150 flex items-center justify-center ${
+                videoActive
+                  ? 'border-[#C0231E] opacity-100 bg-[#1C1C1C]'
+                  : 'border-[#1C1C1C] opacity-50 hover:opacity-80 hover:border-[#525252] bg-[#1C1C1C]'
+              }`}
+            >
+              {ytId ? (
+                <img
+                  src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`}
+                  alt="Video preview"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              ) : null}
+              <div className="relative z-10 w-7 h-7 rounded-full bg-black/70 flex items-center justify-center">
+                <Play size={12} className="text-white fill-white ml-0.5" />
+              </div>
+            </button>
+          )}
         </div>
       )}
 

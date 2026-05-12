@@ -35,6 +35,7 @@ const FOOTER_LINKS = {
     { label: 'Track Order',   href: '/track' },
     { label: 'About Us',      href: '/about' },
     { label: 'FAQ',           href: '/faq' },
+    { label: 'Blog',          href: '/blog' },
   ],
   Connect: [
     { label: 'WhatsApp',      href: `https://wa.me/${WA_NUMBER}`, external: true },

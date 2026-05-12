@@ -65,6 +65,16 @@ const productSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+    // Sizes that are sold out — still shown but greyed out / unselectable
+    soldSizes: {
+      type: [String],
+      default: [],
+    },
+    // Optional video URL (YouTube embed or direct mp4)
+    videoUrl: {
+      type: String,
+      default: '',
+    },
   },
   { timestamps: true }
 )
