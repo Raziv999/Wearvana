@@ -1,35 +1,6 @@
-import { Star } from 'lucide-react'
+import { Star, MessageCircle } from 'lucide-react'
 
-const REVIEWS = [
-  {
-    name: 'Aayush S.',
-    location: 'Kathmandu',
-    product: 'Adidas Samba OG',
-    rating: 5,
-    text: "Got my Sambas in under 3 weeks. Came with the original box and receipt. 100% legit — I was skeptical about pre-ordering but Wearvana made it easy.",
-  },
-  {
-    name: 'Priya M.',
-    location: 'Lalitpur',
-    product: 'New Era Yankees 59FIFTY',
-    rating: 5,
-    text: "Ordered the Yankees cap and it arrived perfectly. The eSewa payment process was smooth and they kept me updated on WhatsApp the whole time.",
-  },
-  {
-    name: 'Roshan T.',
-    location: 'Pokhara',
-    product: 'Air Jordan 1 Chicago',
-    rating: 5,
-    text: "These are the real deal. I've seen fakes and these are not it. Wearvana sourced them fast and delivery to Pokhara was no issue.",
-  },
-  {
-    name: 'Nischal K.',
-    location: 'Bhaktapur',
-    product: 'Nike Air Force 1 LX',
-    rating: 5,
-    text: "First time buying from Wearvana. The chat support was super responsive and the shoes came exactly as described. Already placed my second order.",
-  },
-]
+const WA_NUMBER = '9779705477470'
 
 export default function Testimonials() {
   return (
@@ -51,51 +22,32 @@ export default function Testimonials() {
           </h2>
         </div>
 
-        {/* Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {REVIEWS.map((r) => (
-            <div
-              key={r.name}
-              className="bg-[#111111] border border-[#242424] p-5 flex flex-col gap-4 hover:border-[#C0231E]/30 transition-colors duration-300"
-            >
-              {/* Stars */}
-              <div className="flex gap-0.5">
-                {[...Array(r.rating)].map((_, i) => (
-                  <Star key={i} size={12} className="fill-[#C0231E] text-[#C0231E]" />
-                ))}
-              </div>
-
-              {/* Review text */}
-              <p className="font-body text-[#909090] text-sm leading-relaxed flex-1">
-                "{r.text}"
-              </p>
-
-              {/* Product tag */}
-              <span className="font-body text-[9px] tracking-[0.15em] uppercase text-[#525252] border border-[#1C1C1C] px-2 py-1 self-start">
-                {r.product}
-              </span>
-
-              {/* Author */}
-              <div className="flex items-center gap-2 pt-2 border-t border-[#1C1C1C]">
-                <div className="w-7 h-7 rounded-full bg-[#C0231E]/20 border border-[#C0231E]/30 flex items-center justify-center">
-                  <span className="font-heading font-black text-[#C0231E] text-xs">
-                    {r.name.charAt(0)}
-                  </span>
-                </div>
-                <div>
-                  <p className="font-body font-bold text-[#F4F4F4] text-xs">{r.name}</p>
-                  <p className="font-body text-[#525252] text-[10px]">{r.location}</p>
-                </div>
-              </div>
-            </div>
-          ))}
+        {/* Empty state — replace with real reviews when you have them */}
+        <div className="border border-dashed border-[#242424] p-12 flex flex-col items-center justify-center gap-4 text-center">
+          <div className="flex gap-0.5 mb-2">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} size={20} className="text-[#242424]" />
+            ))}
+          </div>
+          <p className="font-body text-[#525252] text-sm max-w-sm leading-relaxed">
+            Be the first to review Wearvana. Order your kicks, then share your experience on WhatsApp or Instagram.
+          </p>
+          <a
+            href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent('Hi Wearvana! I want to share a review about my recent order.')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 border border-[#242424] hover:border-[#C0231E]/50 text-[#525252] hover:text-[#F4F4F4] font-body font-bold text-[10px] tracking-[0.18em] uppercase px-5 py-3 transition-all mt-2"
+          >
+            <MessageCircle size={13} />
+            Share Your Experience
+          </a>
         </div>
 
         {/* Trust numbers */}
         <div className="grid grid-cols-3 gap-4 mt-10 pt-10 border-t border-[#1C1C1C]">
           {[
-            { value: '100+', label: 'Orders Fulfilled' },
-            { value: '4.9★', label: 'Average Rating' },
+            { value: '100%', label: 'Authentic Products' },
+            { value: '50%',  label: 'Advance Only' },
             { value: '0',    label: 'Fake Products Sold' },
           ].map((stat) => (
             <div key={stat.label} className="text-center">
