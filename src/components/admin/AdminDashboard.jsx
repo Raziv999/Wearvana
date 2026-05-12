@@ -44,39 +44,45 @@ export default function AdminDashboard() {
   // --- Server status ---
   const [serverStatus, setServerStatus] = useState('checking') // 'checking' | 'online' | 'offline'
   const [waking, setWaking]             = useState(false)
+  const pollRef                         = useRef(null)
 
-  // ── Server wake-up ────────────────────────────────────────────
-  const wakeServer = useCallback(async () => {
+  // Silent check on mount — no tab, just one fetch
+  useEffect(() => {
+    fetch(`${API}/api/products`, { cache: 'no-store' })
+      .then(res => {
+        if (res.ok) return res.json().then(data => { setProducts(data); setServerStatus('online') })
+        else setServerStatus('offline')
+      })
+      .catch(() => setServerStatus('offline'))
+  }, [])
+
+  // Manual wake — opens tab + polls until online
+  const wakeServer = () => {
+    window.open(`${API}/api/products`, '_blank', 'noopener')
     setWaking(true)
     setServerStatus('checking')
-    // Open the API in a new tab so the browser wakes Render regardless of CORS/timeout
-    window.open(`${API}/api/products`, '_blank', 'noopener')
-    // Poll every 5s for up to 75s until the server responds
+    clearInterval(pollRef.current)
     let attempts = 0
-    const maxAttempts = 15
-    const poll = async () => {
+    pollRef.current = setInterval(async () => {
       attempts++
       try {
         const res = await fetch(`${API}/api/products`, { cache: 'no-store' })
         if (res.ok) {
-          setServerStatus('online')
           const data = await res.json()
           setProducts(data)
+          setServerStatus('online')
           setWaking(false)
+          clearInterval(pollRef.current)
           return
         }
       } catch { /* still waking */ }
-      if (attempts < maxAttempts) {
-        setTimeout(poll, 5000)
-      } else {
+      if (attempts >= 15) {
         setServerStatus('offline')
         setWaking(false)
+        clearInterval(pollRef.current)
       }
-    }
-    setTimeout(poll, 5000)
-  }, [])
-
-  useEffect(() => { wakeServer() }, [wakeServer])
+    }, 5000)
+  }
 
   // ── Fetch orders ──────────────────────────────────────────────
   const fetchOrders = useCallback(async () => {
@@ -105,8 +111,9 @@ export default function AdminDashboard() {
     setProductsLoading(false)
   }, [])
 
-  useEffect(() => { fetchOrders()  }, [fetchOrders])
-  useEffect(() => { fetchProducts() }, [fetchProducts])
+  useEffect(() => { fetchOrders() }, [fetchOrders])
+  // fetchProducts is called by the silent server check on mount;
+  // only re-fetch when explicitly requested (refresh button / after save)
 
   // ── Order handlers ────────────────────────────────────────────
   const handleStatusChange = async (orderId, newStatus) => {
