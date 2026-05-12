@@ -7,6 +7,9 @@ export default async function sitemap() {
     { url: `${BASE}/#sneakers`,        changeFrequency: 'daily',   priority: 0.9 },
     { url: `${BASE}/#caps`,            changeFrequency: 'daily',   priority: 0.9 },
     { url: `${BASE}/#how-it-works`,    changeFrequency: 'monthly', priority: 0.4 },
+    { url: `${BASE}/faq`,              changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE}/track`,            changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${BASE}/about`,            changeFrequency: 'monthly', priority: 0.4 },
   ].map((p) => ({ ...p, lastModified: new Date() }))
 
   // Dynamic product pages — fetched from MongoDB via API

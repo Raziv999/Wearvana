@@ -181,7 +181,7 @@ export default function Footer() {
         <div className="border-t border-[#1C1C1C]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="font-body text-[#383838] text-xs tracking-wide text-center sm:text-left">
-              © 2026 Wearvana · Nepal's Premier Streetwear Pre-Order Platform
+              © {new Date().getFullYear()} Wearvana · Nepal's Premier Streetwear Pre-Order Platform
             </p>
             <p className="font-body text-[#383838] text-xs tracking-wide">
               All products 100% authentic · eSewa & Khalti accepted
