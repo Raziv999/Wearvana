@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { X, Loader2, RefreshCw, ChevronDown } from 'lucide-react'
 import ImageUploader from './ImageUploader'
 
@@ -39,6 +39,8 @@ export default function ProductFormModal({ product, onClose, onSaved }) {
   const [loading, setLoading]       = useState(false)
   const [error, setError]           = useState('')
   const [slugEdited, setSlugEdited] = useState(false)
+  const [retryMsg, setRetryMsg]     = useState('')
+  const retryTimer                  = useRef(null)
 
   useEffect(() => {
     if (product) {
@@ -89,9 +91,23 @@ export default function ProductFormModal({ product, onClose, onSaved }) {
     setSlugEdited(false)
   }
 
+  const doSave = async (payload) => {
+    const url    = isEdit ? `${API}/api/products/${product._id}` : `${API}/api/products`
+    const method = isEdit ? 'PATCH' : 'POST'
+    const res    = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.message ?? data.error ?? 'Something went wrong.')
+    return data
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    setRetryMsg('')
     if (!form.name.trim())     return setError('Product name is required.')
     if (!form.colorway.trim()) return setError('Colorway is required.')
     if (!form.price)           return setError('Price is required.')
@@ -108,19 +124,44 @@ export default function ProductFormModal({ product, onClose, onSaved }) {
     }
 
     setLoading(true)
+
+    // Attempt 1
     try {
-      const url    = isEdit ? `${API}/api/products/${product._id}` : `${API}/api/products`
-      const method = isEdit ? 'PATCH' : 'POST'
-      const res    = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      const data = await res.json()
-      if (!res.ok) setError(data.message ?? data.error ?? 'Something went wrong.')
-      else onSaved(data)
+      const data = await doSave(payload)
+      onSaved(data)
+      return
+    } catch (err) {
+      const isNetwork = err instanceof TypeError  // fetch() threw — network error
+      if (!isNetwork) {
+        setError(err.message)
+        setLoading(false)
+        return
+      }
+    }
+
+    // Network error — server likely asleep. Auto-retry with countdown.
+    let secs = 30
+    setRetryMsg(`Server is waking up… retrying in ${secs}s`)
+    retryTimer.current = setInterval(() => {
+      secs -= 1
+      if (secs > 0) {
+        setRetryMsg(`Server is waking up… retrying in ${secs}s`)
+      } else {
+        clearInterval(retryTimer.current)
+        setRetryMsg('Retrying now…')
+      }
+    }, 1000)
+
+    await new Promise(r => setTimeout(r, 30_000))
+    clearInterval(retryTimer.current)
+    setRetryMsg('')
+
+    // Attempt 2
+    try {
+      const data = await doSave(payload)
+      onSaved(data)
     } catch {
-      setError('Could not connect to server.')
+      setError('Still could not reach server. Visit getwearvana.com/api/products in your browser to wake it, then try again.')
     } finally {
       setLoading(false)
     }
@@ -365,6 +406,12 @@ export default function ProductFormModal({ product, onClose, onSaved }) {
               </div>
             )}
 
+            {retryMsg && (
+              <div className="flex items-center gap-2 font-body text-[#FBBF24] text-xs leading-relaxed">
+                <Loader2 size={13} className="animate-spin shrink-0" />
+                {retryMsg}
+              </div>
+            )}
             {error && (
               <p className="font-body text-[#C0231E] text-xs leading-relaxed">{error}</p>
             )}

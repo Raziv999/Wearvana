@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Package, Clock, CheckCircle, DollarSign, Plus, RefreshCw, LogOut, ShoppingBag, Tag } from 'lucide-react'
+import { Package, Clock, CheckCircle, DollarSign, Plus, RefreshCw, LogOut, ShoppingBag, Tag, Wifi, WifiOff } from 'lucide-react'
 import OrderTable from './OrderTable'
 import NewOrderForm from './NewOrderForm'
 import ProductTable from './ProductTable'
@@ -40,6 +40,31 @@ export default function AdminDashboard() {
   const [editingProduct, setEditingProduct]   = useState(null)  // null = closed, {} = new, product = edit
   const [showProductForm, setShowProductForm] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState(null)  // detail panel
+
+  // --- Server status ---
+  const [serverStatus, setServerStatus] = useState('checking') // 'checking' | 'online' | 'offline'
+  const [waking, setWaking]             = useState(false)
+
+  // ── Server wake-up ────────────────────────────────────────────
+  const wakeServer = useCallback(async () => {
+    setWaking(true)
+    setServerStatus('checking')
+    try {
+      const res = await fetch(`${API}/api/products`, { cache: 'no-store' })
+      if (res.ok) {
+        setServerStatus('online')
+        const data = await res.json()
+        setProducts(data)
+      } else {
+        setServerStatus('offline')
+      }
+    } catch {
+      setServerStatus('offline')
+    }
+    setWaking(false)
+  }, [])
+
+  useEffect(() => { wakeServer() }, [wakeServer])
 
   // ── Fetch orders ──────────────────────────────────────────────
   const fetchOrders = useCallback(async () => {
@@ -180,6 +205,33 @@ export default function AdminDashboard() {
           </button>
         </div>
       </div>
+
+      {/* ── Server status banner ── */}
+      {serverStatus !== 'online' && (
+        <div className={`px-4 sm:px-8 py-2 flex items-center gap-3 text-xs font-body ${
+          serverStatus === 'checking' ? 'bg-[#1C1C1C] text-[#909090]' : 'bg-[#C0231E]/10 border-b border-[#C0231E]/20 text-[#C0231E]'
+        }`}>
+          {serverStatus === 'checking' ? (
+            <>
+              <RefreshCw size={12} className="animate-spin shrink-0" />
+              Connecting to server…
+            </>
+          ) : (
+            <>
+              <WifiOff size={12} className="shrink-0" />
+              Server is asleep (Render free tier). Save will fail until it wakes.
+              <button
+                onClick={wakeServer}
+                disabled={waking}
+                className="ml-auto flex items-center gap-1.5 border border-[#C0231E]/40 hover:border-[#C0231E] px-3 py-1 transition-colors disabled:opacity-50"
+              >
+                <Wifi size={11} />
+                {waking ? 'Waking…' : 'Wake Server'}
+              </button>
+            </>
+          )}
+        </div>
+      )}
 
       {/* ── Mobile tab bar ── */}
       <div className="sm:hidden flex border-b border-[#242424]">
