@@ -227,7 +227,7 @@ export default function AdminDashboard() {
 
       {/* ── Server status banner ── */}
       {serverStatus !== 'online' && (
-        <div className={`px-4 sm:px-8 py-2 flex items-center gap-3 text-xs font-body ${
+        <div className={`px-4 sm:px-8 py-3 flex flex-wrap items-center gap-3 text-xs font-body ${
           serverStatus === 'checking' ? 'bg-[#1C1C1C] text-[#909090]' : 'bg-[#C0231E]/10 border-b border-[#C0231E]/20 text-[#C0231E]'
         }`}>
           {serverStatus === 'checking' ? (
@@ -238,17 +238,30 @@ export default function AdminDashboard() {
           ) : (
             <>
               <WifiOff size={12} className="shrink-0" />
-              {waking
-                ? 'Opening server in new tab — wait ~30s then come back here…'
-                : 'Server is asleep. Click Wake Server, wait for the new tab to load JSON, then come back.'}
-              <button
-                onClick={wakeServer}
-                disabled={waking}
-                className="ml-auto flex items-center gap-1.5 border border-[#C0231E]/40 hover:border-[#C0231E] px-3 py-1 transition-colors disabled:opacity-50"
-              >
-                <Wifi size={11} />
-                {waking ? 'Waking… checking every 5s' : 'Wake Server'}
-              </button>
+              <span>
+                {waking
+                  ? 'Server tab opened — wait for JSON to appear in that tab, then click Refresh here →'
+                  : 'Server is asleep. Step 1: click Wake Server. Step 2: wait for JSON in the new tab. Step 3: click Refresh here.'}
+              </span>
+              <div className="ml-auto flex items-center gap-2">
+                {waking && (
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="flex items-center gap-1.5 bg-[#C0231E] text-white px-3 py-1.5 transition-colors font-bold"
+                  >
+                    <RefreshCw size={11} />
+                    Refresh Page
+                  </button>
+                )}
+                <button
+                  onClick={wakeServer}
+                  disabled={waking}
+                  className="flex items-center gap-1.5 border border-[#C0231E]/40 hover:border-[#C0231E] px-3 py-1.5 transition-colors disabled:opacity-40"
+                >
+                  <Wifi size={11} />
+                  {waking ? 'Tab opened…' : 'Wake Server'}
+                </button>
+              </div>
             </>
           )}
         </div>
