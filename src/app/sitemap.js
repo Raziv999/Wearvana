@@ -1,4 +1,4 @@
-const BASE = 'https://wearvana.com'
+const BASE = 'https://getwearvana.com'
 
 export default async function sitemap() {
   // Static pages

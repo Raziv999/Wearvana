@@ -4,7 +4,7 @@ import AnnouncementBanner from '@/components/AnnouncementBanner'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 
 export const metadata = {
-  metadataBase: new URL('https://wearvana.com'),
+  metadataBase: new URL('https://getwearvana.com'),
   title: {
     default: 'Wearvana — Exclusive Sneakers & Caps in Nepal',
     template: '%s — Wearvana',
@@ -32,7 +32,7 @@ export const metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://wearvana.com',
+    url: 'https://getwearvana.com',
     siteName: 'Wearvana',
     title: 'Wearvana — Exclusive Sneakers & Caps in Nepal',
     description:
@@ -60,8 +60,8 @@ const jsonLd = {
   '@type': 'ClothingStore',
   name: 'Wearvana',
   description: 'Exclusive sneakers and New Era caps in Nepal. Pre-order platform.',
-  url: 'https://wearvana.com',
-  logo: 'https://wearvana.com/logo.png',
+  url: 'https://getwearvana.com',
+  logo: 'https://getwearvana.com/logo.png',
   contactPoint: {
     '@type': 'ContactPoint',
     telephone: '+977-9705477470',

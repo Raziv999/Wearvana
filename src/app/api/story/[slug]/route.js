@@ -3,7 +3,7 @@ import { ImageResponse } from 'next/og'
 export const runtime = 'edge'
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000'
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://wearvana.com'
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://getwearvana.com'
 
 const BRAND_BG = {
   NIKE:          '#0d0d0d',
@@ -228,7 +228,7 @@ export async function GET(request, { params }) {
             fontSize: '22px',
             letterSpacing: '0.15em',
             textTransform: 'uppercase',
-          }}>@wearvana.kicks · wearvana.com</span>
+          }}>@wearvana.kicks · getwearvana.com</span>
         </div>
       </div>
     ),

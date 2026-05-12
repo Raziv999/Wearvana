@@ -313,7 +313,7 @@ export default function ProductFormModal({ product, onClose, onSaved }) {
               </div>
               {form.slug && (
                 <p className="font-body text-[#383838] text-[9px] mt-1 truncate">
-                  wearvana.com/product/<span className="text-[#525252]">{form.slug}</span>
+                  getwearvana.com/product/<span className="text-[#525252]">{form.slug}</span>
                 </p>
               )}
             </div>

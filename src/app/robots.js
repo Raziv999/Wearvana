@@ -12,7 +12,7 @@ export default function robots() {
         disallow: '/',
       },
     ],
-    sitemap: 'https://wearvana.com/sitemap.xml',
-    host: 'https://wearvana.com',
+    sitemap: 'https://getwearvana.com/sitemap.xml',
+    host: 'https://getwearvana.com',
   }
 }

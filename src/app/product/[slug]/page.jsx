@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import ProductPageClient from '@/components/ProductPageClient'
 
-const BASE_URL = 'https://wearvana.com'
+const BASE_URL = 'https://getwearvana.com'
 const FALLBACK_IMAGE = `${BASE_URL}/og-image.jpg`
 
 async function getProduct(slugOrId) {

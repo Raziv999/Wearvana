@@ -74,7 +74,7 @@ const FAQS = [
       },
       {
         q: 'How do I track my order?',
-        a: 'Go to wearvana.com/track and enter your order ID (e.g. WV-001). You\'ll see live status updates — Received, Confirmed, Sourcing, Arrived in Nepal, Delivered. Your order ID is sent to you via WhatsApp when your order is confirmed.',
+        a: 'Go to getwearvana.com/track and enter your order ID (e.g. WV-001). You\'ll see live status updates — Received, Confirmed, Sourcing, Arrived in Nepal, Delivered. Your order ID is sent to you via WhatsApp when your order is confirmed.',
       },
     ],
   },
