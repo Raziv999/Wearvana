@@ -49,19 +49,31 @@ export default function AdminDashboard() {
   const wakeServer = useCallback(async () => {
     setWaking(true)
     setServerStatus('checking')
-    try {
-      const res = await fetch(`${API}/api/products`, { cache: 'no-store' })
-      if (res.ok) {
-        setServerStatus('online')
-        const data = await res.json()
-        setProducts(data)
+    // Open the API in a new tab so the browser wakes Render regardless of CORS/timeout
+    window.open(`${API}/api/products`, '_blank', 'noopener')
+    // Poll every 5s for up to 75s until the server responds
+    let attempts = 0
+    const maxAttempts = 15
+    const poll = async () => {
+      attempts++
+      try {
+        const res = await fetch(`${API}/api/products`, { cache: 'no-store' })
+        if (res.ok) {
+          setServerStatus('online')
+          const data = await res.json()
+          setProducts(data)
+          setWaking(false)
+          return
+        }
+      } catch { /* still waking */ }
+      if (attempts < maxAttempts) {
+        setTimeout(poll, 5000)
       } else {
         setServerStatus('offline')
+        setWaking(false)
       }
-    } catch {
-      setServerStatus('offline')
     }
-    setWaking(false)
+    setTimeout(poll, 5000)
   }, [])
 
   useEffect(() => { wakeServer() }, [wakeServer])
@@ -219,14 +231,16 @@ export default function AdminDashboard() {
           ) : (
             <>
               <WifiOff size={12} className="shrink-0" />
-              Server is asleep (Render free tier). Save will fail until it wakes.
+              {waking
+                ? 'Opening server in new tab — wait ~30s then come back here…'
+                : 'Server is asleep. Click Wake Server, wait for the new tab to load JSON, then come back.'}
               <button
                 onClick={wakeServer}
                 disabled={waking}
                 className="ml-auto flex items-center gap-1.5 border border-[#C0231E]/40 hover:border-[#C0231E] px-3 py-1 transition-colors disabled:opacity-50"
               >
                 <Wifi size={11} />
-                {waking ? 'Waking…' : 'Wake Server'}
+                {waking ? 'Waking… checking every 5s' : 'Wake Server'}
               </button>
             </>
           )}
