@@ -7,7 +7,38 @@ import { trackEvent } from './GoogleAnalytics'
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000'
 const WA_NUMBER = '9779705477470'
 
+// EmailJS config — set these in Vercel env vars
+const EMAILJS_SERVICE  = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID
+const EMAILJS_TEMPLATE = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID
+const EMAILJS_KEY      = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
+
 const PAYMENT_METHODS = ['eSewa', 'Khalti']
+
+// Send confirmation email via EmailJS REST API (no package needed)
+async function sendConfirmationEmail({ customerName, customerEmail, orderId, productName, productBrand, colorway, size, advanceAmount, paymentMethod }) {
+  if (!EMAILJS_SERVICE || !EMAILJS_TEMPLATE || !EMAILJS_KEY || !customerEmail) return
+  try {
+    await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        service_id:  EMAILJS_SERVICE,
+        template_id: EMAILJS_TEMPLATE,
+        user_id:     EMAILJS_KEY,
+        template_params: {
+          to_name:        customerName,
+          to_email:       customerEmail,
+          order_id:       orderId,
+          product_name:   `${productBrand} ${productName}`,
+          colorway,
+          size,
+          advance_amount: `NPR ${advanceAmount.toLocaleString()}`,
+          payment_method: paymentMethod,
+        },
+      }),
+    })
+  } catch { /* email is best-effort, never block the order */ }
+}
 
 export default function OrderFormModal({ product, selectedSize, onClose }) {
   const [step, setStep]         = useState(1) // 1 = form, 2 = success
@@ -20,6 +51,7 @@ export default function OrderFormModal({ product, selectedSize, onClose }) {
   const [form, setForm] = useState({
     customerName:     '',
     customerPhone:    '',
+    customerEmail:    '',
     paymentMethod:    'eSewa',
     paymentReference: '',
   })
@@ -60,9 +92,7 @@ export default function OrderFormModal({ product, selectedSize, onClose }) {
       return data
     }
 
-    // Attempt 1
-    try {
-      const data = await doSubmit()
+    const onSuccess = (data) => {
       setOrderId(data.orderId)
       setStep(2)
       trackEvent('purchase', {
@@ -74,6 +104,24 @@ export default function OrderFormModal({ product, selectedSize, onClose }) {
         value:          advanceAmount,
         currency:       'NPR',
       })
+      // Send confirmation email (best-effort, non-blocking)
+      sendConfirmationEmail({
+        customerName:  form.customerName.trim(),
+        customerEmail: form.customerEmail.trim(),
+        orderId:       data.orderId,
+        productName:   product.name,
+        productBrand:  product.brand,
+        colorway:      product.colorway,
+        size:          selectedSize,
+        advanceAmount,
+        paymentMethod: form.paymentMethod,
+      })
+    }
+
+    // Attempt 1
+    try {
+      const data = await doSubmit()
+      onSuccess(data)
       setLoading(false)
       return
     } catch (err) {
@@ -111,9 +159,14 @@ export default function OrderFormModal({ product, selectedSize, onClose }) {
         currency:       'NPR',
       })
     } catch {
-      setError('Still could not connect. Please try ordering via WhatsApp instead.')
-    } finally {
-      setLoading(false)
+      try {
+        const data = await doSubmit()
+        onSuccess(data)
+      } catch {
+        setError('Still could not connect. Please try ordering via WhatsApp instead.')
+      } finally {
+        setLoading(false)
+      }
     }
   }
 
@@ -186,6 +239,21 @@ export default function OrderFormModal({ product, selectedSize, onClose }) {
                 value={form.customerPhone}
                 onChange={set('customerPhone')}
                 placeholder="98XXXXXXXX"
+                className="w-full bg-[#1C1C1C] border border-[#242424] text-[#F4F4F4] font-body text-sm px-4 py-3 placeholder-[#525252] focus:outline-none focus:border-[#C0231E] transition-colors"
+              />
+            </div>
+
+            {/* Email (optional) */}
+            <div>
+              <label className="font-body text-[10px] text-[#525252] tracking-[0.15em] uppercase block mb-1.5">
+                Email
+                <span className="normal-case ml-1 opacity-50">(optional — for order confirmation)</span>
+              </label>
+              <input
+                type="email"
+                value={form.customerEmail}
+                onChange={set('customerEmail')}
+                placeholder="you@example.com"
                 className="w-full bg-[#1C1C1C] border border-[#242424] text-[#F4F4F4] font-body text-sm px-4 py-3 placeholder-[#525252] focus:outline-none focus:border-[#C0231E] transition-colors"
               />
             </div>

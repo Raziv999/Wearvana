@@ -154,11 +154,19 @@ const BRAND_ORDER = ['ALL', 'NIKE', 'JORDAN', 'ADIDAS', 'NEW BALANCE', 'NEW ERA'
 
 // ─────────────────────────────────────────────────────────────
 
+const PRICE_RANGES = [
+  { label: 'All Prices', min: 0,     max: Infinity },
+  { label: 'Under 10K',  min: 0,     max: 9999 },
+  { label: '10K – 20K',  min: 10000, max: 20000 },
+  { label: '20K+',       min: 20001, max: Infinity },
+]
+
 export default function FilterableGrid({ products }) {
   const [open, setOpen]         = useState(false)
   const [search, setSearch]     = useState('')
   const [hoveredBrand, setHoveredBrand] = useState('ALL')
   const [active, setActive]     = useState({ type: 'shopby', index: 0 })
+  const [priceIdx, setPriceIdx] = useState(0)   // index into PRICE_RANGES
   const panelRef = useRef(null)
   const btnRef   = useRef(null)
 
@@ -206,6 +214,10 @@ export default function FilterableGrid({ products }) {
       pool = products.filter(shopByFilters[active.index] ?? (() => true))
     }
 
+    // Apply price range
+    const { min, max } = PRICE_RANGES[priceIdx]
+    if (priceIdx > 0) pool = pool.filter(p => p.price >= min && p.price <= max)
+
     if (!search.trim()) return pool
     const q = search.toLowerCase()
     return pool.filter(p =>
@@ -213,7 +225,7 @@ export default function FilterableGrid({ products }) {
       p.brand?.toLowerCase().includes(q) ||
       p.colorway?.toLowerCase().includes(q)
     )
-  }, [products, active, search])
+  }, [products, active, search, priceIdx])
 
   // Active label for chip
   const activeLabel = useMemo(() => {
@@ -301,6 +313,24 @@ export default function FilterableGrid({ products }) {
         <p className="font-body text-[#383838] text-xs tracking-wide ml-auto">
           {filtered.length} {filtered.length === 1 ? 'style' : 'styles'}
         </p>
+      </div>
+
+      {/* ── Price range chips ── */}
+      <div className="flex items-center gap-2 mb-5 flex-wrap">
+        <p className="font-body text-[9px] text-[#383838] tracking-[0.18em] uppercase shrink-0">Price</p>
+        {PRICE_RANGES.map((range, i) => (
+          <button
+            key={range.label}
+            onClick={() => setPriceIdx(i)}
+            className={`font-body text-[10px] font-semibold tracking-[0.12em] uppercase px-3 py-1.5 border transition-all duration-150 ${
+              priceIdx === i
+                ? 'bg-[#C0231E] border-[#C0231E] text-white'
+                : 'border-[#242424] text-[#525252] hover:border-[#C0231E]/40 hover:text-[#F4F4F4]'
+            }`}
+          >
+            {range.label}
+          </button>
+        ))}
       </div>
 
       {/* ── Mega dropdown ── */}

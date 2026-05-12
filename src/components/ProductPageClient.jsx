@@ -5,6 +5,7 @@ import { MessageCircle, ArrowLeft, Share2, Check, Ruler, Download } from 'lucide
 import SizeGuideModal from './SizeGuideModal'
 import OrderFormModal from './OrderFormModal'
 import ProductGallery from './ProductGallery'
+import ViewingCounter from './ViewingCounter'
 import { trackEvent } from './GoogleAnalytics'
 
 const WA_NUMBER = '9779705477470'
@@ -134,6 +135,11 @@ export default function ProductPageClient({ product }) {
             >
               {product.name}
             </h1>
+
+            {/* Live viewer counter */}
+            <div className="mb-3">
+              <ViewingCounter productId={product._id} />
+            </div>
 
             {/* Colorway + subcategory */}
             <p className="font-body text-[#909090] text-sm mb-6">

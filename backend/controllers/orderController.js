@@ -1,5 +1,25 @@
 const Order = require('../models/Order')
 const Product = require('../models/Product')
+const https = require('https')
+
+// ── Send WhatsApp notification to admin via CallMeBot ────────────
+function notifyAdmin(order) {
+  const phone  = process.env.CALLMEBOT_PHONE
+  const apikey = process.env.CALLMEBOT_APIKEY
+  if (!phone || !apikey) return // silently skip if not configured
+
+  const text = encodeURIComponent(
+    `🛒 NEW ORDER — ${order.orderId}\n` +
+    `👤 ${order.customerName} | 📱 ${order.customerPhone}\n` +
+    `👟 ${order.productBrand} ${order.productName}\n` +
+    `📏 Size: ${order.size}\n` +
+    `💵 Advance: NPR ${order.advanceAmount.toLocaleString()} via ${order.paymentMethod ?? 'TBD'}\n` +
+    `${order.paymentReference ? `🔖 Ref: ${order.paymentReference}` : '⚠️ No payment ref yet'}`
+  )
+
+  const url = `https://api.callmebot.com/whatsapp.php?phone=${phone}&text=${text}&apikey=${apikey}`
+  https.get(url, () => {}).on('error', () => {}) // fire-and-forget
+}
 
 // GET /api/orders — all orders, newest first
 const getOrders = async (req, res) => {
@@ -91,6 +111,9 @@ const createOrder = async (req, res) => {
       if (product.slotsRemaining === 0) product.available = false
       await product.save()
     }
+
+    // Notify admin on WhatsApp (fire-and-forget, never blocks the response)
+    notifyAdmin(order)
 
     res.status(201).json(order)
   } catch (err) {
