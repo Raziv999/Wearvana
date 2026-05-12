@@ -103,7 +103,7 @@ export default function ProductCard({ product }) {
         </div>
 
         {/* Slots remaining indicator */}
-        {product.slotsRemaining !== null && product.slotsRemaining <= 5 && (
+        {product.slotsRemaining !== null && product.slotsRemaining > 0 && product.slotsRemaining <= 5 && (
           <div className="absolute bottom-0 left-0 right-0 bg-[#C0231E]/90 py-1.5 text-center z-10">
             <p className="font-body text-[9px] text-white font-bold tracking-[0.15em] uppercase">
               Only {product.slotsRemaining} slots left

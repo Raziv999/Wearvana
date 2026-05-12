@@ -6,7 +6,7 @@ import ImageUploader from './ImageUploader'
 
 const API = process.env.NEXT_PUBLIC_API_URL
 
-const BRANDS    = ['NIKE', 'JORDAN', 'ADIDAS', 'NEW BALANCE', 'NEW ERA']
+const BRANDS    = ['NIKE', 'JORDAN', 'ADIDAS', 'NEW BALANCE', 'NEW ERA', 'ON RUNNING']
 const CATEGORIES = ['sneakers', 'running', 'caps']
 const BADGES    = ['', 'HOT', 'NEW', 'SELLING FAST', 'ICONIC']
 

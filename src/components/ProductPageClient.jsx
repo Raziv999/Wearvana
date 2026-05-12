@@ -196,41 +196,60 @@ export default function ProductPageClient({ product }) {
               </div>
             </div>
 
-            {/* Primary CTA — order form */}
-            <button
-              disabled={!selectedSize}
-              onClick={() => {
-                if (!selectedSize) return
-                trackEvent('begin_checkout', {
-                  item_id: product.slug,
-                  item_name: product.name,
-                  item_brand: product.brand,
-                  size: selectedSize,
-                  price: product.price,
-                  currency: 'NPR',
-                })
-                setOrderFormOpen(true)
-              }}
-              className={`flex items-center justify-center gap-3 w-full font-body font-bold text-xs tracking-[0.18em] uppercase py-5 transition-all duration-200 ${
-                selectedSize
-                  ? 'bg-[#C0231E] hover:bg-[#D4251F] text-white'
-                  : 'bg-[#1C1C1C] text-[#525252] cursor-default'
-              }`}
-            >
-              {selectedSize ? `Pre-Order in Size ${selectedSize}` : 'Select a Size to Pre-Order'}
-            </button>
+            {/* Primary CTA — order form or sold out */}
+            {product.available ? (
+              <>
+                <button
+                  disabled={!selectedSize}
+                  onClick={() => {
+                    if (!selectedSize) return
+                    trackEvent('begin_checkout', {
+                      item_id: product.slug,
+                      item_name: product.name,
+                      item_brand: product.brand,
+                      size: selectedSize,
+                      price: product.price,
+                      currency: 'NPR',
+                    })
+                    setOrderFormOpen(true)
+                  }}
+                  className={`flex items-center justify-center gap-3 w-full font-body font-bold text-xs tracking-[0.18em] uppercase py-5 transition-all duration-200 ${
+                    selectedSize
+                      ? 'bg-[#C0231E] hover:bg-[#D4251F] text-white'
+                      : 'bg-[#1C1C1C] text-[#525252] cursor-default'
+                  }`}
+                >
+                  {selectedSize ? `Pre-Order in Size ${selectedSize}` : 'Select a Size to Pre-Order'}
+                </button>
 
-            {/* Secondary — WhatsApp fallback */}
-            {selectedSize && (
-              <a
-                href={waLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full border border-[#242424] hover:border-[#C0231E]/40 text-[#525252] hover:text-[#F4F4F4] font-body text-[10px] tracking-[0.15em] uppercase py-3 mt-2 transition-all duration-200"
-              >
-                <MessageCircle size={12} />
-                Or order via WhatsApp
-              </a>
+                {/* Secondary — WhatsApp fallback */}
+                {selectedSize && (
+                  <a
+                    href={waLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full border border-[#242424] hover:border-[#C0231E]/40 text-[#525252] hover:text-[#F4F4F4] font-body text-[10px] tracking-[0.15em] uppercase py-3 mt-2 transition-all duration-200"
+                  >
+                    <MessageCircle size={12} />
+                    Or order via WhatsApp
+                  </a>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="flex items-center justify-center w-full bg-[#1C1C1C] border border-[#242424] text-[#525252] font-body font-bold text-xs tracking-[0.18em] uppercase py-5">
+                  Sold Out
+                </div>
+                <a
+                  href={`https://wa.me/9779705477470?text=${encodeURIComponent(`Hi Wearvana! I'd like to be notified when the ${product.name} (${product.colorway}) is back. Please add me to the waitlist!`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full border border-[#242424] hover:border-[#C0231E]/40 text-[#525252] hover:text-[#F4F4F4] font-body text-[10px] tracking-[0.15em] uppercase py-3.5 mt-2 transition-all duration-200"
+                >
+                  <MessageCircle size={12} />
+                  Join Waitlist via WhatsApp
+                </a>
+              </>
             )}
 
             {/* Story download */}

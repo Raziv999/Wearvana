@@ -21,7 +21,7 @@ export default function CustomSource() {
       `📏 Size: ${size.trim()}\n\n` +
       `Can you check availability and pricing?`
     )
-    window.open(`https://wa.me/${WA_NUMBER}?text=${message}`, '_blank')
+    window.open(`https://wa.me/${WA_NUMBER}?text=${message}`, '_blank', 'noopener,noreferrer')
   }
 
   return (

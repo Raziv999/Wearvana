@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { X, MessageCircle, CheckCircle2, Loader2 } from 'lucide-react'
 import { trackEvent } from './GoogleAnalytics'
 
@@ -13,7 +13,9 @@ export default function OrderFormModal({ product, selectedSize, onClose }) {
   const [step, setStep]         = useState(1) // 1 = form, 2 = success
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState('')
+  const [retryMsg, setRetryMsg] = useState('')
   const [orderId, setOrderId]   = useState('')
+  const retryTimer              = useRef(null)
 
   const [form, setForm] = useState({
     customerName:     '',
@@ -32,42 +34,84 @@ export default function OrderFormModal({ product, selectedSize, onClose }) {
 
     if (!form.customerName.trim())  return setError('Please enter your name.')
     if (!form.customerPhone.trim()) return setError('Please enter your phone number.')
-    if (form.customerPhone.trim().length < 10) return setError('Enter a valid phone number.')
+    const phone = form.customerPhone.trim().replace(/\s+/g, '')
+    if (!/^(98|97)\d{8}$/.test(phone)) return setError('Enter a valid Nepal mobile number (e.g. 98XXXXXXXX).')
 
     setLoading(true)
-    try {
+    setRetryMsg('')
+
+    const payload = {
+      productId:        product._id,
+      customerName:     form.customerName.trim(),
+      customerPhone:    phone,
+      size:             selectedSize,
+      paymentMethod:    form.paymentMethod,
+      paymentReference: form.paymentReference.trim(),
+    }
+
+    const doSubmit = async () => {
       const res = await fetch(`${API}/api/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          productId:        product._id,
-          customerName:     form.customerName.trim(),
-          customerPhone:    form.customerPhone.trim(),
-          size:             selectedSize,
-          paymentMethod:    form.paymentMethod,
-          paymentReference: form.paymentReference.trim(),
-        }),
+        body: JSON.stringify(payload),
       })
-
       const data = await res.json()
+      if (!res.ok) throw new Error(data.message ?? 'Something went wrong. Try again.')
+      return data
+    }
 
-      if (!res.ok) {
-        setError(data.message ?? 'Something went wrong. Try again.')
-      } else {
-        setOrderId(data.orderId)
-        setStep(2)
-        trackEvent('purchase', {
-          transaction_id: data.orderId,
-          item_id:        product.slug,
-          item_name:      product.name,
-          item_brand:     product.brand,
-          size:           selectedSize,
-          value:          advanceAmount,
-          currency:       'NPR',
-        })
+    // Attempt 1
+    try {
+      const data = await doSubmit()
+      setOrderId(data.orderId)
+      setStep(2)
+      trackEvent('purchase', {
+        transaction_id: data.orderId,
+        item_id:        product.slug,
+        item_name:      product.name,
+        item_brand:     product.brand,
+        size:           selectedSize,
+        value:          advanceAmount,
+        currency:       'NPR',
+      })
+      setLoading(false)
+      return
+    } catch (err) {
+      if (!(err instanceof TypeError)) {
+        setError(err.message)
+        setLoading(false)
+        return
       }
+    }
+
+    // Network error — auto-retry after 30s
+    let secs = 30
+    setRetryMsg(`Server is waking up… retrying in ${secs}s`)
+    retryTimer.current = setInterval(() => {
+      secs -= 1
+      if (secs > 0) setRetryMsg(`Server is waking up… retrying in ${secs}s`)
+      else { clearInterval(retryTimer.current); setRetryMsg('Retrying…') }
+    }, 1000)
+    await new Promise(r => setTimeout(r, 30_000))
+    clearInterval(retryTimer.current)
+    setRetryMsg('')
+
+    // Attempt 2
+    try {
+      const data = await doSubmit()
+      setOrderId(data.orderId)
+      setStep(2)
+      trackEvent('purchase', {
+        transaction_id: data.orderId,
+        item_id:        product.slug,
+        item_name:      product.name,
+        item_brand:     product.brand,
+        size:           selectedSize,
+        value:          advanceAmount,
+        currency:       'NPR',
+      })
     } catch {
-      setError('Could not connect to server. Try again.')
+      setError('Still could not connect. Please try ordering via WhatsApp instead.')
     } finally {
       setLoading(false)
     }
@@ -184,6 +228,12 @@ export default function OrderFormModal({ product, selectedSize, onClose }) {
               />
             </div>
 
+            {retryMsg && (
+              <div className="flex items-center gap-2 font-body text-[#FBBF24] text-xs">
+                <Loader2 size={12} className="animate-spin shrink-0" />
+                {retryMsg}
+              </div>
+            )}
             {error && (
               <p className="font-body text-[#C0231E] text-xs">{error}</p>
             )}
