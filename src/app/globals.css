@@ -63,3 +63,52 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* ── Light mode overrides ─────────────────────────────────────
+   Tailwind classes use hardcoded hex values, so we override them
+   using attribute selectors scoped to [data-theme="light"].
+   The brand red (#C0231E) stays the same in both modes.
+   ─────────────────────────────────────────────────────────── */
+html[data-theme="light"] {
+  color-scheme: light;
+}
+html[data-theme="light"] html,
+html[data-theme="light"] body {
+  background-color: #F5F5F5;
+  color: #111111;
+}
+
+/* --- Backgrounds --- */
+html[data-theme="light"] .bg-\[\#0A0A0A\]    { background-color: #F5F5F5 !important; }
+html[data-theme="light"] .bg-\[\#111111\]    { background-color: #FFFFFF !important; }
+html[data-theme="light"] .bg-\[\#1C1C1C\]    { background-color: #EFEFEF !important; }
+html[data-theme="light"] .bg-\[\#242424\]    { background-color: #E5E5E5 !important; }
+html[data-theme="light"] .bg-\[\#383838\]    { background-color: #D0D0D0 !important; }
+
+/* Header backdrop */
+html[data-theme="light"] .bg-\[\#0A0A0A\]\/95 { background-color: rgba(245,245,245,0.97) !important; }
+
+/* --- Text --- */
+html[data-theme="light"] .text-\[\#F4F4F4\]  { color: #111111 !important; }
+html[data-theme="light"] .text-\[\#909090\]  { color: #444444 !important; }
+html[data-theme="light"] .text-\[\#525252\]  { color: #666666 !important; }
+html[data-theme="light"] .text-\[\#383838\]  { color: #888888 !important; }
+html[data-theme="light"] .text-\[\#2a2a2a\]  { color: #AAAAAA !important; }
+html[data-theme="light"] .text-\[\#0A0A0A\]  { color: #F5F5F5 !important; }
+
+/* --- Borders --- */
+html[data-theme="light"] .border-\[\#242424\] { border-color: #DEDEDE !important; }
+html[data-theme="light"] .border-\[\#1C1C1C\] { border-color: #E8E8E8 !important; }
+html[data-theme="light"] .border-\[\#383838\] { border-color: #C8C8C8 !important; }
+
+/* --- Scrollbar --- */
+html[data-theme="light"] ::-webkit-scrollbar-track { background: #F0F0F0; }
+
+/* --- Input fields (admin / order form) --- */
+html[data-theme="light"] .field-input {
+  background: #FAFAFA !important;
+  border-color: #DEDEDE !important;
+  color: #111111 !important;
+}
+html[data-theme="light"] .field-input:focus { border-color: #C0231E !important; }
+html[data-theme="light"] .field-input::placeholder { color: #AAAAAA !important; }

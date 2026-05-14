@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed'
+import { clImage } from '@/lib/cloudinary'
 
 export default function RecentlyViewed({ currentProductId, product }) {
   const { items, mounted, trackView } = useRecentlyViewed()
@@ -50,7 +51,7 @@ export default function RecentlyViewed({ currentProductId, product }) {
               <div className="relative aspect-square bg-[#1C1C1C] overflow-hidden">
                 {p.image && p.image.startsWith('http') ? (
                   <Image
-                    src={p.image}
+                    src={clImage(p.image, 400)}
                     alt={p.name}
                     fill
                     className="object-contain group-hover:scale-105 transition-transform duration-300 p-2"

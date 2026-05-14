@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight, X, ZoomIn, Play } from 'lucide-react'
+import { clImage } from '@/lib/cloudinary'
 
 // Extract YouTube video ID from various URL formats
 function getYouTubeId(url) {
@@ -24,11 +25,12 @@ const BADGE_STYLES = {
 }
 
 export default function ProductGallery({ product, gradient, accent }) {
-  // Merge main + gallery images, remove blanks and dupes
+  // Merge main + gallery images, remove blanks and dupes, optimize
   const allImages = [product.image, ...(product.images ?? [])]
     .map(s => s?.trim())
     .filter(Boolean)
     .filter((src, i, arr) => arr.indexOf(src) === i)
+    .map(src => clImage(src, 1200))
 
   const [activeIdx, setActiveIdx]   = useState(0)
   const [videoActive, setVideoActive] = useState(false)

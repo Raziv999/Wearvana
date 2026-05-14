@@ -90,6 +90,8 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Wearvana" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        {/* Anti-FOUC: apply saved theme before first paint */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('wearvana_theme')||'dark';document.documentElement.setAttribute('data-theme',t);})()` }} />
         {/* JSON-LD */}
         <script
           type="application/ld+json"

@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { Menu, X, MessageCircle, Instagram, Heart } from 'lucide-react'
 import { useGrailList } from '@/hooks/useGrailList'
 import GrailDrawer from './GrailDrawer'
+import ThemeToggle from './ThemeToggle'
 
 const WA_NUMBER = '9779705477470'
 const WA_LINK = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(
@@ -58,6 +59,7 @@ export default function Header() {
 
             {/* Desktop right side */}
             <div className="hidden md:flex items-center gap-4">
+              <ThemeToggle />
               <a
                 href={INSTAGRAM_URL}
                 target="_blank"
@@ -95,6 +97,7 @@ export default function Header() {
 
             {/* Mobile right side */}
             <div className="md:hidden flex items-center gap-3">
+              <ThemeToggle />
               <button
                 onClick={() => setGrailOpen(true)}
                 className="relative text-[#525252] p-1"

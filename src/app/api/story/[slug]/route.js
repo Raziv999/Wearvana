@@ -2,21 +2,21 @@ import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000'
+const API      = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000'
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://getwearvana.com'
 
 const BRAND_BG = {
-  NIKE:          '#0d0d0d',
-  JORDAN:        '#0d0808',
-  ADIDAS:        '#080810',
-  'NEW BALANCE': '#080d08',
-  'NEW ERA':     '#0d0d08',
+  NIKE:          ['#0d0d0d', '#1a0505'],
+  JORDAN:        ['#0d0808', '#1f0404'],
+  ADIDAS:        ['#080810', '#050518'],
+  'NEW BALANCE': ['#080d08', '#041204'],
+  'NEW ERA':     ['#0d0d08', '#1a1a06'],
 }
 
 const BRAND_ACCENT = {
   NIKE:          '#C0231E',
   JORDAN:        '#C0231E',
-  ADIDAS:        '#3b4cca',
+  ADIDAS:        '#4a5cf0',
   'NEW BALANCE': '#00802b',
   'NEW ERA':     '#C0231E',
 }
@@ -28,16 +28,22 @@ export async function GET(request, { params }) {
   try {
     const res = await fetch(`${API}/api/products/slug/${slug}`, { cache: 'no-store' })
     if (res.ok) product = await res.json()
-  } catch {
-    // use fallback below
-  }
+  } catch { /* use fallback */ }
 
-  const bg     = product ? (BRAND_BG[product.brand]     ?? '#0d0d0d') : '#0d0d0d'
-  const accent = product ? (BRAND_ACCENT[product.brand] ?? '#C0231E') : '#C0231E'
-  const name   = product?.name      ?? 'Exclusive Drop'
-  const brand  = product?.brand     ?? 'WEARVANA'
-  const color  = product?.colorway  ?? ''
-  const price  = product?.price     ? `NPR ${product.price.toLocaleString()}` : ''
+  const [bgTop, bgBot] = product ? (BRAND_BG[product.brand] ?? ['#0d0d0d', '#1a0505']) : ['#0d0d0d', '#1a0505']
+  const accent  = product ? (BRAND_ACCENT[product.brand] ?? '#C0231E') : '#C0231E'
+  const name    = product?.name     ?? 'Exclusive Drop'
+  const brand   = product?.brand    ?? 'WEARVANA'
+  const color   = product?.colorway ?? ''
+  const price   = product?.price    ? `NPR ${Number(product.price).toLocaleString()}` : ''
+  const advance = product?.price    ? `NPR ${Math.ceil(product.price / 2).toLocaleString()} advance` : ''
+  const isLimited = product?.limited ?? false
+  const badge   = product?.badge ?? null
+
+  // Fix: Cloudinary URLs are absolute; local paths need BASE_URL prefix
+  const imgSrc = product?.image
+    ? (product.image.startsWith('http') ? product.image : `${BASE_URL}${product.image}`)
+    : null
 
   return new ImageResponse(
     (
@@ -45,196 +51,254 @@ export async function GET(request, { params }) {
         style={{
           width: '1080px',
           height: '1920px',
-          background: bg,
+          background: `linear-gradient(160deg, ${bgTop} 0%, ${bgBot} 60%, #000 100%)`,
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
           fontFamily: 'sans-serif',
           position: 'relative',
           overflow: 'hidden',
         }}
       >
-        {/* Background radial glow */}
+        {/* ── Noise texture overlay ── */}
         <div style={{
           position: 'absolute',
           inset: 0,
-          background: `radial-gradient(ellipse 80% 50% at 50% 100%, ${accent}30 0%, transparent 60%)`,
+          opacity: 0.025,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+          backgroundSize: '256px 256px',
         }} />
 
-        {/* Grid overlay */}
+        {/* ── Diagonal accent stripe ── */}
         <div style={{
           position: 'absolute',
-          inset: 0,
-          opacity: 0.03,
-          backgroundImage: `linear-gradient(to right, #F4F4F4 1px, transparent 1px), linear-gradient(to bottom, #F4F4F4 1px, transparent 1px)`,
-          backgroundSize: '100px 100px',
+          top: '-200px',
+          right: '-100px',
+          width: '700px',
+          height: '2400px',
+          background: `linear-gradient(180deg, ${accent}18 0%, transparent 50%)`,
+          transform: 'rotate(15deg)',
+          transformOrigin: 'top center',
         }} />
 
-        {/* PRE-ORDER badge */}
+        {/* ── Bottom radial glow ── */}
         <div style={{
           position: 'absolute',
-          top: '80px',
-          left: '80px',
+          bottom: '-100px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '900px',
+          height: '600px',
+          background: `radial-gradient(ellipse at center, ${accent}35 0%, transparent 70%)`,
+        }} />
+
+        {/* ── TOP BAR ── */}
+        <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '14px',
-          border: `1px solid ${accent}50`,
-          background: `${accent}18`,
-          padding: '14px 28px',
+          justifyContent: 'space-between',
+          padding: '70px 80px 0',
         }}>
-          <div style={{
-            width: '10px',
-            height: '10px',
-            borderRadius: '50%',
-            background: accent,
-          }} />
+          {/* Logo wordmark */}
           <span style={{
-            color: accent,
-            fontSize: '22px',
-            fontWeight: 700,
-            letterSpacing: '0.22em',
+            color: '#F4F4F4',
+            fontSize: '38px',
+            fontWeight: 900,
+            letterSpacing: '0.2em',
             textTransform: 'uppercase',
-          }}>Pre-Order Now</span>
-        </div>
+          }}>WEARVANA</span>
 
-        {/* Product image (if available) */}
-        {product?.image && (
-          <img
-            src={`${BASE_URL}${product.image}`}
-            style={{
-              width: '860px',
-              height: '860px',
-              objectFit: 'cover',
-              marginBottom: '40px',
-            }}
-          />
-        )}
-
-        {/* Brand initial circle (fallback when no image) */}
-        {!product?.image && (
+          {/* Status pill */}
           <div style={{
-            width: '240px',
-            height: '240px',
-            borderRadius: '50%',
-            border: `2px solid ${accent}40`,
-            background: `${accent}15`,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: '60px',
+            gap: '12px',
+            background: `${accent}22`,
+            border: `1px solid ${accent}55`,
+            padding: '14px 28px',
           }}>
-            <span style={{ color: `${accent}80`, fontSize: '120px', fontWeight: 900 }}>
-              {brand.charAt(0)}
-            </span>
+            <div style={{
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              background: accent,
+            }} />
+            <span style={{
+              color: accent,
+              fontSize: '20px',
+              fontWeight: 700,
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+            }}>{badge ?? 'Pre-Order'}</span>
           </div>
-        )}
+        </div>
 
-        {/* Content block */}
+        {/* ── PRODUCT IMAGE ── */}
         <div style={{
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
-          padding: '0 80px',
+          justifyContent: 'center',
+          flex: 1,
+          padding: '60px 60px 20px',
+          position: 'relative',
         }}>
-          {/* Brand */}
+          {imgSrc ? (
+            <img
+              src={imgSrc}
+              style={{
+                maxWidth: '900px',
+                maxHeight: '780px',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 40px 80px rgba(0,0,0,0.8))',
+              }}
+            />
+          ) : (
+            <div style={{
+              width: '340px',
+              height: '340px',
+              borderRadius: '50%',
+              border: `3px solid ${accent}35`,
+              background: `${accent}12`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <span style={{ color: `${accent}70`, fontSize: '180px', fontWeight: 900 }}>
+                {brand.charAt(0)}
+              </span>
+            </div>
+          )}
+          {isLimited && (
+            <div style={{
+              position: 'absolute',
+              bottom: '30px',
+              left: '80px',
+              background: accent,
+              color: '#fff',
+              fontSize: '18px',
+              fontWeight: 700,
+              letterSpacing: '0.2em',
+              padding: '10px 22px',
+              textTransform: 'uppercase',
+            }}>LIMITED</div>
+          )}
+        </div>
+
+        {/* ── PRODUCT INFO BLOCK ── */}
+        <div style={{
+          padding: '0 80px 30px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0',
+        }}>
+          {/* Brand label */}
           <span style={{
             color: '#525252',
-            fontSize: '26px',
+            fontSize: '24px',
             fontWeight: 600,
             letterSpacing: '0.3em',
             textTransform: 'uppercase',
-            marginBottom: '20px',
+            marginBottom: '16px',
           }}>{brand}</span>
 
-          {/* Name */}
+          {/* Product name */}
           <span style={{
             color: '#F4F4F4',
-            fontSize: '96px',
+            fontSize: name.length > 20 ? '80px' : '96px',
             fontWeight: 900,
             textTransform: 'uppercase',
-            textAlign: 'center',
-            lineHeight: 0.9,
+            lineHeight: 0.88,
             marginBottom: '24px',
+            letterSpacing: '-0.01em',
           }}>{name}</span>
 
           {/* Colorway */}
           {color && (
             <span style={{
-              color: '#909090',
-              fontSize: '32px',
-              textAlign: 'center',
-              marginBottom: '40px',
+              color: '#6A6A6A',
+              fontSize: '28px',
+              marginBottom: '36px',
+              letterSpacing: '0.02em',
             }}>{color}</span>
           )}
 
           {/* Divider */}
           <div style={{
-            width: '80px',
-            height: '2px',
-            background: accent,
-            marginBottom: '40px',
+            width: '100%',
+            height: '1px',
+            background: `linear-gradient(to right, ${accent}80, transparent)`,
+            marginBottom: '36px',
           }} />
 
-          {/* Price + payment */}
+          {/* Price row */}
           {price && (
             <div style={{
               display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '12px',
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
             }}>
-              <span style={{
-                color: accent,
-                fontSize: '64px',
-                fontWeight: 700,
-                letterSpacing: '0.04em',
-              }}>{price}</span>
-              <span style={{
-                color: '#525252',
-                fontSize: '24px',
-                letterSpacing: '0.2em',
-                textTransform: 'uppercase',
-              }}>50% advance · eSewa / Khalti</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{
+                  color: '#525252',
+                  fontSize: '20px',
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                }}>Pre-Order Price</span>
+                <span style={{
+                  color: accent,
+                  fontSize: '72px',
+                  fontWeight: 700,
+                  lineHeight: 1,
+                  letterSpacing: '0.02em',
+                }}>{price}</span>
+              </div>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-end',
+                gap: '8px',
+              }}>
+                <span style={{
+                  color: '#525252',
+                  fontSize: '20px',
+                  letterSpacing: '0.15em',
+                  textTransform: 'uppercase',
+                }}>Pay Today</span>
+                <span style={{
+                  color: '#F4F4F4',
+                  fontSize: '38px',
+                  fontWeight: 700,
+                  letterSpacing: '0.02em',
+                }}>{advance}</span>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Bottom branding */}
+        {/* ── BOTTOM BAR ── */}
         <div style={{
-          position: 'absolute',
-          bottom: '80px',
-          left: 0,
-          right: 0,
+          borderTop: '1px solid #1C1C1C',
+          padding: '32px 80px',
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
-          gap: '12px',
+          justifyContent: 'space-between',
         }}>
-          <div style={{
-            width: '600px',
-            height: '1px',
-            background: '#1C1C1C',
-          }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <span style={{ color: '#525252', fontSize: '18px', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+              eSewa · Khalti · 100% Authentic
+            </span>
+            <span style={{ color: '#383838', fontSize: '16px', letterSpacing: '0.1em' }}>
+              getwearvana.com
+            </span>
+          </div>
           <span style={{
-            color: '#F4F4F4',
-            fontSize: '52px',
-            fontWeight: 900,
+            color: '#2a2a2a',
+            fontSize: '20px',
             letterSpacing: '0.15em',
             textTransform: 'uppercase',
-          }}>WEARVANA</span>
-          <span style={{
-            color: '#525252',
-            fontSize: '22px',
-            letterSpacing: '0.15em',
-            textTransform: 'uppercase',
-          }}>@wearvana.kicks · getwearvana.com</span>
+          }}>@wearvana.kicks</span>
         </div>
       </div>
     ),
-    {
-      width: 1080,
-      height: 1920,
-    }
+    { width: 1080, height: 1920 }
   )
 }

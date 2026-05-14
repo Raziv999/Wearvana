@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { MessageCircle, ArrowLeft, Share2, Check, Ruler, Download } from 'lucide-react'
+import { MessageCircle, ArrowLeft, Share2, Check, Ruler, Download, Bell } from 'lucide-react'
 import SizeGuideModal from './SizeGuideModal'
 import OrderFormModal from './OrderFormModal'
 import ProductGallery from './ProductGallery'
 import ViewingCounter from './ViewingCounter'
+import WaitlistModal from './WaitlistModal'
 import { trackEvent } from './GoogleAnalytics'
 
 const WA_NUMBER = '9779705477470'
@@ -40,10 +41,11 @@ const BADGE_STYLES = {
 
 export default function ProductPageClient({ product }) {
   const sizes = product.category === 'caps' ? CAP_SIZES : SNEAKER_SIZES
-  const [selectedSize, setSelectedSize]   = useState('')
-  const [copied, setCopied]               = useState(false)
-  const [sizeGuideOpen, setSizeGuideOpen] = useState(false)
-  const [orderFormOpen, setOrderFormOpen] = useState(false)
+  const [selectedSize, setSelectedSize]     = useState('')
+  const [copied, setCopied]                 = useState(false)
+  const [sizeGuideOpen, setSizeGuideOpen]   = useState(false)
+  const [orderFormOpen, setOrderFormOpen]   = useState(false)
+  const [waitlistOpen, setWaitlistOpen]     = useState(false)
 
   // Track product view
   useEffect(() => {
@@ -253,15 +255,13 @@ export default function ProductPageClient({ product }) {
                 <div className="flex items-center justify-center w-full bg-[#1C1C1C] border border-[#242424] text-[#525252] font-body font-bold text-xs tracking-[0.18em] uppercase py-5">
                   Sold Out
                 </div>
-                <a
-                  href={`https://wa.me/9779705477470?text=${encodeURIComponent(`Hi Wearvana! I'd like to be notified when the ${product.name} (${product.colorway}) is back. Please add me to the waitlist!`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() => setWaitlistOpen(true)}
                   className="flex items-center justify-center gap-2 w-full border border-[#242424] hover:border-[#C0231E]/40 text-[#525252] hover:text-[#F4F4F4] font-body text-[10px] tracking-[0.15em] uppercase py-3.5 mt-2 transition-all duration-200"
                 >
-                  <MessageCircle size={12} />
-                  Join Waitlist via WhatsApp
-                </a>
+                  <Bell size={12} />
+                  Join the Waitlist
+                </button>
               </>
             )}
 
@@ -307,6 +307,10 @@ export default function ProductPageClient({ product }) {
           selectedSize={selectedSize}
           onClose={() => setOrderFormOpen(false)}
         />
+      )}
+
+      {waitlistOpen && (
+        <WaitlistModal product={product} onClose={() => setWaitlistOpen(false)} />
       )}
     </div>
   )

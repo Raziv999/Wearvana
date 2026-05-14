@@ -1,6 +1,77 @@
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
 import { Star, MessageCircle } from 'lucide-react'
 
 const WA_NUMBER = '9779705477470'
+
+// ── Animated count-up hook ────────────────────────────────────
+function useCountUp(target, duration = 1800, startOnVisible = true) {
+  const [value, setValue]     = useState(0)
+  const [started, setStarted] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    if (!startOnVisible) { setStarted(true); return }
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setStarted(true); observer.disconnect() } },
+      { threshold: 0.4 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [startOnVisible])
+
+  useEffect(() => {
+    if (!started || target === 0) return
+    let start = null
+    const step = (timestamp) => {
+      if (!start) start = timestamp
+      const progress = Math.min((timestamp - start) / duration, 1)
+      // Ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3)
+      setValue(Math.round(eased * target))
+      if (progress < 1) requestAnimationFrame(step)
+    }
+    requestAnimationFrame(step)
+  }, [started, target, duration])
+
+  return { value, ref }
+}
+
+// ── Individual stat ───────────────────────────────────────────
+function AnimatedStat({ value: rawValue, suffix = '', label }) {
+  // Parse numeric target from rawValue string e.g. "100%", "50%", "0"
+  const numeric = parseInt(rawValue.replace(/\D/g, ''), 10) || 0
+  const prefix  = rawValue.match(/^[^0-9]*/)?.[0] ?? ''
+  // suffix from the rawValue string (after digits), plus any extra suffix prop
+  const valueSuffix = rawValue.match(/[^0-9]+$/)?.[0] ?? ''
+
+  const { value, ref } = useCountUp(numeric, 1600)
+
+  return (
+    <div ref={ref} className="text-center">
+      <p
+        className="font-heading font-black text-[#C0231E] leading-none uppercase"
+        style={{ fontSize: 'clamp(1.5rem, 4vw, 2.8rem)' }}
+      >
+        {prefix}{value}{valueSuffix}
+      </p>
+      <p className="font-body text-[#525252] text-[10px] tracking-[0.18em] uppercase mt-1.5">
+        {label}
+      </p>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────
+
+const STATS = [
+  { value: '100%', label: 'Authentic Products' },
+  { value: '50%',  label: 'Advance Only' },
+  { value: '0',    label: 'Fake Products Sold' },
+]
 
 export default function Testimonials() {
   return (
@@ -43,26 +114,13 @@ export default function Testimonials() {
           </a>
         </div>
 
-        {/* Trust numbers */}
+        {/* Trust numbers — animated on scroll into view */}
         <div className="grid grid-cols-3 gap-4 mt-10 pt-10 border-t border-[#1C1C1C]">
-          {[
-            { value: '100%', label: 'Authentic Products' },
-            { value: '50%',  label: 'Advance Only' },
-            { value: '0',    label: 'Fake Products Sold' },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center">
-              <p
-                className="font-heading font-black text-[#C0231E] leading-none uppercase"
-                style={{ fontSize: 'clamp(1.5rem, 4vw, 2.8rem)' }}
-              >
-                {stat.value}
-              </p>
-              <p className="font-body text-[#525252] text-[10px] tracking-[0.18em] uppercase mt-1.5">
-                {stat.label}
-              </p>
-            </div>
+          {STATS.map((stat) => (
+            <AnimatedStat key={stat.label} value={stat.value} label={stat.label} />
           ))}
         </div>
+
       </div>
     </section>
   )

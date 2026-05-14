@@ -1,9 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { MessageCircle, Bell } from 'lucide-react'
 import GrailButton from './GrailButton'
+import { clImage } from '@/lib/cloudinary'
+import WaitlistModal from './WaitlistModal'
 
 // Replace with your actual WhatsApp business number (with country code, no +)
 const WA_NUMBER = '9779705477470'
@@ -33,6 +36,8 @@ const BRAND_ACCENT = {
 }
 
 export default function ProductCard({ product }) {
+  const [waitlistOpen, setWaitlistOpen] = useState(false)
+
   const waMessage = encodeURIComponent(
     `Hi Wearvana! I'm interested in pre-ordering the ${product.name} (${product.colorway}). Can you check availability for me?`
   )
@@ -70,7 +75,7 @@ export default function ProductCard({ product }) {
         {/* Product image — renders above placeholder */}
         {product.image && (
           <Image
-            src={product.image}
+            src={clImage(product.image, 600)}
             alt={product.name}
             fill
             loading="lazy"
@@ -164,20 +169,20 @@ export default function ProductCard({ product }) {
             Check Availability in Chat
           </a>
         ) : (
-          <a
-            href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(
-              `Hi Wearvana! I'd like to be notified when the ${product.name} (${product.colorway}) is back in stock. Please add me to the waitlist!`
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={() => setWaitlistOpen(true)}
             className="flex items-center justify-center gap-2 w-full border border-[#242424] hover:border-[#C0231E]/50 text-[#525252] hover:text-[#F4F4F4] font-body font-bold text-[10px] tracking-[0.18em] uppercase py-3.5 transition-all duration-200"
           >
             <Bell size={13} className="flex-shrink-0" />
             Notify Me When Back
-          </a>
+          </button>
         )}
 
       </div>
+
+      {waitlistOpen && (
+        <WaitlistModal product={product} onClose={() => setWaitlistOpen(false)} />
+      )}
     </div>
   )
 }
