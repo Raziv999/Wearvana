@@ -99,7 +99,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        <AnnouncementBanner />
+        {/* <AnnouncementBanner /> */}
         {children}
         <WhatsAppFloat />
         <GoogleAnalytics />

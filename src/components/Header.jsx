@@ -28,7 +28,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#242424]">
+      <header className="sticky top-0 z-40 bg-[#0A0A0A] backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
 
@@ -40,6 +40,7 @@ export default function Header() {
                 width={160}
                 height={48}
                 className="h-8 md:h-10 w-auto"
+                style={{ mixBlendMode: 'screen' }}
                 priority
               />
             </a>
