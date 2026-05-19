@@ -22,7 +22,7 @@ const SNEAKER_SIZES = [
 const CAP_SIZES = [
   { size: 'S/M',      circumference: '54 – 56 cm', fits: 'Most women, smaller heads' },
   { size: 'L/XL',     circumference: '57 – 59 cm', fits: 'Most men, average heads' },
-  { size: 'One Size', circumference: 'Adjustable',  fits: 'Snapback — fits all' },
+  { size: 'One Size', circumference: 'Adjustable',  fits: 'Snapback, fits all' },
 ]
 
 export default function SizeGuideModal({ category, onClose }) {
@@ -130,7 +130,7 @@ export default function SizeGuideModal({ category, onClose }) {
           {/* Tip */}
           <div className="mt-5 pt-5 border-t border-[#242424]">
             <p className="font-body text-[#525252] text-xs leading-relaxed">
-              <span className="text-[#C0231E] font-semibold">Not sure?</span> Message us on WhatsApp — we'll help you pick the right size before you commit to the pre-order.
+              <span className="text-[#C0231E] font-semibold">Not sure?</span> Message us on WhatsApp and we'll help you pick the right size before you commit to the pre-order.
             </p>
           </div>
         </div>

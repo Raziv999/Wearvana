@@ -359,10 +359,10 @@ trackEvent('search', ...)           // FilterableGrid — on autocomplete select
 - [x] WhatsApp admin alerts on new orders
 - [x] Email confirmation to customer (EmailJS)
 - [x] Live viewing counter per product (seeded from product ID)
-- [x] Price filter chips (Under 10K / 10K–20K / 20K+)
+- [x] Price filter chips (Under 10K / 10K-20K / 20K+)
 - [x] Search with autocomplete (2+ chars, 5 suggestions, brand/name/colorway)
 - [x] Mega dropdown brand/silhouette filter
-- [x] Grail list (wishlist) — heart button + slide-out drawer
+- [x] Grail list (wishlist) with slide-out drawer
 - [x] Recently Viewed strip on product pages (max 4, localStorage)
 - [x] soldSizes — admin checkbox grid, greyed-out on product page
 - [x] Video support — YouTube embed or .mp4 in gallery
@@ -371,10 +371,13 @@ trackEvent('search', ...)           // FilterableGrid — on autocomplete select
 - [x] Animated count-up stats (IntersectionObserver, ease-out cubic)
 - [x] Dark / Light mode toggle (persisted in localStorage, anti-FOUC)
 - [x] Instagram Story image generation (/api/story/[slug])
-- [x] "Download Instagram Story" button on product pages
+- [x] Download Instagram Story button on product pages
 - [x] Real Instagram feed via Behold.so widget
-- [x] Real customer reviews — admin-managed, star ratings, avatar initials
+- [x] Real customer reviews (admin-managed, star ratings, avatar initials)
 - [x] Order tracking page (/track) — live lookup by order ID with status timeline
+- [x] Announcement banner removed from homepage
+- [x] Drop 001 badge removed from hero section
+- [x] Em dashes removed from all user-facing UI text
 
 ### Admin Panel
 - [x] Orders tab (CRUD, status filter, stats cards)
@@ -406,35 +409,36 @@ trackEvent('search', ...)           // FilterableGrid — on autocomplete select
 
 | Item | Priority | Notes |
 |---|---|---|
-| Light mode polish (admin modals) | Low | globals.css has overrides; edge cases may remain |
+| Logo PNG with transparent/black bg | High | Current logo.png may have white bg; mix-blend-mode:screen applied as workaround |
+| Phone-based order lookup on /track | Low | Currently order ID only; add GET /api/orders/track?phone= to backend |
 | PWA push notifications | Low | manifest.json exists; needs OneSignal or native Push API |
-| Phone-based order lookup on /track | Low | Currently order ID only; could add `?phone=` lookup |
-| More blog articles | Low | Add to src/data/blogPosts.js — no other changes needed |
-| Google Search Console verification | Manual | Submit sitemap.xml at getwearvana.com/sitemap.xml |
+| More blog articles | Low | Add entries to src/data/blogPosts.js only, no other changes needed |
+| Google Search Console | Manual | Verify domain, submit https://getwearvana.com/sitemap.xml |
+| Re-enable announcement banner | Optional | Uncomment in src/app/layout.jsx when running a new drop campaign |
 
 ---
 
-## 11. Owner Setup Tasks (manual — not code)
+## 11. Owner Setup Tasks (manual, not code)
 
 | Task | Instructions |
 |---|---|
-| CallMeBot API key | Save +34 644 44 79 86 on WhatsApp, send "I allow callmebot to send me messages", get key → add to Render env as CALLMEBOT_API_KEY |
-| EmailJS | emailjs.com → create service + template → add 3 NEXT_PUBLIC_EMAILJS_* to Vercel |
-| Google Analytics | Create GA4 property → add NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXX to Vercel |
+| CallMeBot API key | Save +34 644 44 79 86 on WhatsApp, send "I allow callmebot to send me messages", get key, add to Render env as CALLMEBOT_API_KEY |
+| EmailJS | emailjs.com, create service + template, add 3 NEXT_PUBLIC_EMAILJS_* vars to Vercel |
+| Google Analytics | Create GA4 property, add NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXX to Vercel |
 | Google Search Console | Verify getwearvana.com, submit https://getwearvana.com/sitemap.xml |
-| Upload product photos | Admin panel → edit each product → Cloudinary upload |
-| Add reviews | Admin panel → Reviews button → add real customer reviews |
+| Upload product photos | Admin panel, edit each product, upload via Cloudinary image uploader |
+| Add customer reviews | Admin panel, Reviews button, add real reviews received via WhatsApp/Instagram |
 
 ---
 
 ## 12. Recent Git Commits
 
 ```
+700f441  style: remove announcement banner, clean header blend
+2bbc8b1  feat: GA events audit, light mode polish, status.md rewrite
 b740fbd  feat: reviews system, blog articles, waitlist auto-notify, clImage audit
-621da50  feat: Features 10-14 — Cloudinary, Waitlist, Counters, Story, Dark/Light
-e7b3536  feat: Features 5-9 — Recently Viewed, soldSizes, Autocomplete, Video, Blog
-9ca7f0d  feat: QA fixes, skeleton loaders, lightbox, bulk upload, price filter
-28dd9a3  fix: CORS — add getwearvana.com to allowed origins
+621da50  feat: features 10-14 — Cloudinary, Waitlist, Counters, Story, Dark/Light
+e7b3536  feat: features 5-9 — Recently Viewed, soldSizes, Autocomplete, Video, Blog
 ```
 
 ---

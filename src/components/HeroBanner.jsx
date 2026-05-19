@@ -25,12 +25,6 @@ export default function HeroBanner() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center w-full">
 
-        {/* Live drop badge */}
-        <div className="inline-flex items-center gap-2.5 border border-[#C0231E]/35 bg-[#C0231E]/10 text-[#C0231E] text-[10px] font-body font-bold px-4 py-2 tracking-[0.2em] uppercase mb-10">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#C0231E] animate-[pulse-dot_1.8s_ease-in-out_infinite]" />
-          Drop 001 — Live Now
-        </div>
-
         {/* Hero headline */}
         <h1
           className="font-heading font-black text-[#F4F4F4] uppercase leading-[0.88] tracking-tight mb-6"
@@ -41,9 +35,8 @@ export default function HeroBanner() {
           <span className="text-[#C0231E]">Can't Be Bought.</span>
         </h1>
 
-        {/* Sub-headline — Nepal SEO keywords embedded naturally */}
         <p className="font-product text-[#909090] text-base md:text-lg max-w-md mx-auto mb-10 leading-relaxed">
-          Authentic Premium Sneakers & New Era Caps — Pre-Order in Nepal.
+          Authentic Premium Sneakers &amp; New Era Caps. Pre-Order in Nepal.
           <br className="hidden sm:block" />
           50% advance via eSewa or Khalti. Zero fakes.
         </p>

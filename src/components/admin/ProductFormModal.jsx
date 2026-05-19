@@ -356,7 +356,7 @@ export default function ProductFormModal({ product, onClose, onSaved }) {
                 type="text"
                 value={form.colorway}
                 onChange={set('colorway')}
-                placeholder="Chicago — White / Black / Varsity Red"
+                placeholder="Chicago · White / Black / Varsity Red"
                 className="field-input"
                 autoComplete="off"
               />

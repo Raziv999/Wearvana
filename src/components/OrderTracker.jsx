@@ -115,7 +115,7 @@ export default function OrderTracker() {
   }
 
   const waLink = order
-    ? `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(`Hi Wearvana! I have a question about order ${order.orderId} — ${order.productName} in size ${order.size}.`)}`
+    ? `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(`Hi Wearvana! I have a question about order ${order.orderId} for ${order.productName} in size ${order.size}.`)}`
     : `https://wa.me/${WA_NUMBER}`
 
   return (
@@ -127,7 +127,7 @@ export default function OrderTracker() {
           type="text"
           value={orderId}
           onChange={e => setOrderId(e.target.value)}
-          placeholder="Enter order ID — e.g. WV-001"
+          placeholder="Enter order ID, e.g. WV-001"
           className="flex-1 bg-[#1C1C1C] border border-[#242424] text-[#F4F4F4] font-body text-sm px-4 py-3 placeholder-[#525252] focus:outline-none focus:border-[#C0231E] transition-colors"
         />
         <button

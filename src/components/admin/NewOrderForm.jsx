@@ -82,7 +82,7 @@ export default function NewOrderForm({ onClose, onCreated }) {
               <option value="" className="bg-[#111111]">Select a product</option>
               {products.map((p) => (
                 <option key={p._id} value={p._id} className="bg-[#111111]">
-                  {p.brand} — {p.name} ({p.colorway}) · NPR {p.price.toLocaleString()}
+                  {p.brand} {p.name} ({p.colorway}) · NPR {p.price.toLocaleString()}
                 </option>
               ))}
             </select>

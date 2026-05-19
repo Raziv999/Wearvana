@@ -24,7 +24,7 @@ export default function InstagramSection() {
               Follow the Drop
             </h2>
             <p className="font-body text-[#525252] text-sm mt-2">
-              @wearvana.kicks — New drops, restocks & behind-the-scenes
+              @wearvana.kicks · New drops, restocks &amp; behind-the-scenes
             </p>
           </div>
           <a
