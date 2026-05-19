@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Pencil, Trash2, ExternalLink, ImageOff } from 'lucide-react'
+import { Pencil, Trash2, ExternalLink, ImageOff, Bell } from 'lucide-react'
 import Image from 'next/image'
+import { clImage } from '@/lib/cloudinary'
 
 const API = process.env.NEXT_PUBLIC_API_URL
 
@@ -13,7 +14,7 @@ const BADGE_STYLES = {
   ICONIC:         'bg-[#1C1C1C] text-[#909090]',
 }
 
-export default function ProductTable({ products, loading, onEdit, onRefresh, onSelect, selectedId }) {
+export default function ProductTable({ products, loading, onEdit, onRefresh, onSelect, selectedId, waitlistCounts = {}, onWaitlist }) {
   const [deletingId, setDeletingId] = useState(null)
   const [togglingId, setTogglingId] = useState(null)
 
@@ -84,7 +85,7 @@ export default function ProductTable({ products, loading, onEdit, onRefresh, onS
           <div className="relative aspect-square bg-[#0A0A0A] overflow-hidden">
             {product.image ? (
               <Image
-                src={product.image}
+                src={clImage(product.image, 600)}
                 alt={product.name}
                 fill
                 className="object-cover"
@@ -168,6 +169,20 @@ export default function ProductTable({ products, loading, onEdit, onRefresh, onS
                 {togglingId === product._id
                   ? '...'
                   : product.available ? '● Live' : '○ Off'}
+              </button>
+
+              {/* Waitlist badge */}
+              <button
+                onClick={() => onWaitlist?.(product)}
+                title="View waitlist"
+                className="relative border border-[#242424] hover:border-[#FBBF24]/50 text-[#525252] hover:text-[#FBBF24] p-2 transition-all"
+              >
+                <Bell size={13} />
+                {(waitlistCounts[product._id] ?? 0) > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 bg-[#FBBF24] text-[#0A0A0A] font-body font-bold text-[8px] flex items-center justify-center rounded-full px-0.5">
+                    {waitlistCounts[product._id]}
+                  </span>
+                )}
               </button>
 
               {/* Edit */}

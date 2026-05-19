@@ -38,6 +38,7 @@ app.use('/api/products', require('./routes/products'))
 app.use('/api/orders',   require('./routes/orders'))
 app.use('/api/upload',   require('./routes/upload'))
 app.use('/api/waitlist', require('./routes/waitlist'))
+app.use('/api/reviews',  require('./routes/reviews'))
 
 // Health check
 app.get('/api/health', (req, res) => {

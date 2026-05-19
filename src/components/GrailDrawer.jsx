@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { X, Heart, MessageCircle, Trash2 } from 'lucide-react'
 import { useGrailList } from '@/hooks/useGrailList'
+import { clImage } from '@/lib/cloudinary'
 
 const WA_NUMBER = '9779705477470'
 
@@ -92,9 +93,9 @@ export default function GrailDrawer({ open, onClose }) {
                 <div key={product._id} className="flex items-center gap-3 px-5 py-4">
                   {/* Product image or brand fallback */}
                   <div className="w-14 h-14 bg-[#111111] border border-[#242424] flex-shrink-0 flex items-center justify-center relative overflow-hidden">
-                    {product.image && product.image.startsWith('http') ? (
+                    {product.image ? (
                       <Image
-                        src={product.image}
+                        src={clImage(product.image, 200)}
                         alt={product.name}
                         fill
                         className="object-contain p-1"

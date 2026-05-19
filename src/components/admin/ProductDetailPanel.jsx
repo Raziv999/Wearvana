@@ -6,6 +6,7 @@ import {
   X, Pencil, ExternalLink, Trash2,
   ChevronLeft, ChevronRight, ImageOff, Download,
 } from 'lucide-react'
+import { clImage } from '@/lib/cloudinary'
 
 const API        = process.env.NEXT_PUBLIC_API_URL
 const BADGE_OPTS = ['', 'HOT', 'NEW', 'SELLING FAST', 'ICONIC']
@@ -23,6 +24,7 @@ export default function ProductDetailPanel({ product, onEdit, onClose, onRefresh
     .map(s => s?.trim())
     .filter(Boolean)
     .filter((src, i, arr) => arr.indexOf(src) === i)
+    .map(src => clImage(src, 800))
 
   const [imgIdx, setImgIdx] = useState(0)
 

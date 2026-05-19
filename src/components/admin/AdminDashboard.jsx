@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Package, Clock, CheckCircle, DollarSign, Plus, RefreshCw, LogOut, ShoppingBag, Tag, Wifi, WifiOff } from 'lucide-react'
+import { Package, Clock, CheckCircle, DollarSign, Plus, RefreshCw, LogOut, ShoppingBag, Tag, Wifi, WifiOff, Star } from 'lucide-react'
 import OrderTable from './OrderTable'
 import NewOrderForm from './NewOrderForm'
 import ProductTable from './ProductTable'
 import ProductFormModal from './ProductFormModal'
 import ProductDetailPanel from './ProductDetailPanel'
+import WaitlistPanel from './WaitlistPanel'
+import ReviewManager from './ReviewManager'
 
 const API = process.env.NEXT_PUBLIC_API_URL
 
@@ -37,21 +39,40 @@ export default function AdminDashboard() {
   // --- Products state ---
   const [products, setProducts]               = useState([])
   const [productsLoading, setProductsLoading] = useState(false)
-  const [editingProduct, setEditingProduct]   = useState(null)  // null = closed, {} = new, product = edit
+  const [editingProduct, setEditingProduct]   = useState(null)
   const [showProductForm, setShowProductForm] = useState(false)
-  const [selectedProduct, setSelectedProduct] = useState(null)  // detail panel
+  const [selectedProduct, setSelectedProduct] = useState(null)
+
+  // --- Waitlist state ---
+  const [waitlistCounts, setWaitlistCounts]   = useState({})   // { [productId]: count }
+  const [waitlistProduct, setWaitlistProduct] = useState(null) // product whose panel is open
+
+  // --- Reviews state ---
+  const [showReviews, setShowReviews] = useState(false)
 
   // --- Server status ---
   const [serverStatus, setServerStatus] = useState('checking') // 'checking' | 'online' | 'offline'
   const [waking, setWaking]             = useState(false)
   const pollRef                         = useRef(null)
 
-  // Silent check on mount — no tab, just one fetch
+  // Silent check on mount — fetch products + waitlist counts
   useEffect(() => {
     fetch(`${API}/api/products`, { cache: 'no-store' })
       .then(res => {
-        if (res.ok) return res.json().then(data => { setProducts(data); setServerStatus('online') })
-        else setServerStatus('offline')
+        if (!res.ok) { setServerStatus('offline'); return }
+        res.json().then(async (data) => {
+          setProducts(data)
+          setServerStatus('online')
+          const counts = await Promise.all(
+            data.map(p =>
+              fetch(`${API}/api/waitlist/count/${p._id}`, { cache: 'no-store' })
+                .then(r => r.json())
+                .then(j => [p._id, j.count ?? 0])
+                .catch(() => [p._id, 0])
+            )
+          )
+          setWaitlistCounts(Object.fromEntries(counts))
+        })
       })
       .catch(() => setServerStatus('offline'))
   }, [])
@@ -101,12 +122,23 @@ export default function AdminDashboard() {
     setOrdersLoading(false)
   }, [statusFilter])
 
-  // ── Fetch products ────────────────────────────────────────────
+  // ── Fetch products + waitlist counts ─────────────────────────
   const fetchProducts = useCallback(async () => {
     setProductsLoading(true)
     try {
-      const res = await fetch(`${API}/api/products`, { cache: 'no-store' })
-      setProducts(await res.json())
+      const res  = await fetch(`${API}/api/products`, { cache: 'no-store' })
+      const data = await res.json()
+      setProducts(data)
+      // Fetch waitlist counts for all products in parallel
+      const counts = await Promise.all(
+        data.map(p =>
+          fetch(`${API}/api/waitlist/count/${p._id}`, { cache: 'no-store' })
+            .then(r => r.json())
+            .then(j => [p._id, j.count ?? 0])
+            .catch(() => [p._id, 0])
+        )
+      )
+      setWaitlistCounts(Object.fromEntries(counts))
     } catch { /* API unreachable */ }
     setProductsLoading(false)
   }, [])
@@ -186,6 +218,15 @@ export default function AdminDashboard() {
               </span>
             </button>
           </div>
+
+          {/* Reviews button */}
+          <button
+            onClick={() => setShowReviews(true)}
+            className="hidden sm:flex items-center gap-1.5 border border-[#242424] hover:border-[#FBBF24]/50 text-[#525252] hover:text-[#FBBF24] font-body font-bold text-[10px] tracking-[0.15em] uppercase px-3 py-1.5 transition-all"
+          >
+            <Star size={11} />
+            Reviews
+          </button>
         </div>
 
         <div className="flex items-center gap-3">
@@ -272,10 +313,11 @@ export default function AdminDashboard() {
         {[
           { key: 'orders',   label: 'Orders',   icon: ShoppingBag },
           { key: 'products', label: 'Products', icon: Tag },
-        ].map(({ key, label, icon: Icon }) => (
+          { key: 'reviews',  label: 'Reviews',  icon: Star, action: () => setShowReviews(true) },
+        ].map(({ key, label, icon: Icon, action }) => (
           <button
             key={key}
-            onClick={() => setTab(key)}
+            onClick={action ?? (() => setTab(key))}
             className={`flex-1 flex items-center justify-center gap-2 py-3 font-body font-bold text-[10px] tracking-[0.15em] uppercase border-b-2 transition-all ${
               tab === key
                 ? 'border-[#C0231E] text-[#F4F4F4]'
@@ -377,6 +419,8 @@ export default function AdminDashboard() {
                   onSelect={(p) => setSelectedProduct(prev => prev?._id === p._id ? null : p)}
                   onEdit={(product) => { setEditingProduct(product); setShowProductForm(true) }}
                   onRefresh={fetchProducts}
+                  waitlistCounts={waitlistCounts}
+                  onWaitlist={(p) => setWaitlistProduct(p)}
                 />
               </div>
 
@@ -445,11 +489,24 @@ export default function AdminDashboard() {
           onSaved={(saved) => {
             setShowProductForm(false)
             setEditingProduct(null)
-            // Auto-select the saved product in the detail panel
             setSelectedProduct(saved)
             fetchProducts()
           }}
         />
+      )}
+
+      {waitlistProduct && (
+        <WaitlistPanel
+          product={waitlistProduct}
+          onClose={() => setWaitlistProduct(null)}
+          onCountChange={(productId, count) =>
+            setWaitlistCounts(prev => ({ ...prev, [productId]: count }))
+          }
+        />
+      )}
+
+      {showReviews && (
+        <ReviewManager onClose={() => setShowReviews(false)} />
       )}
     </div>
   )

@@ -1,4 +1,19 @@
-const Product = require('../models/Product')
+const https   = require('https')
+const Product  = require('../models/Product')
+const Waitlist = require('../models/Waitlist')
+
+// ── CallMeBot WhatsApp sender ──────────────────────────────────
+// Fire-and-forget. Encodes the message and POSTs to CallMeBot.
+function sendWhatsApp(phone, message) {
+  return new Promise((resolve) => {
+    const encoded = encodeURIComponent(message)
+    const url = `https://api.callmebot.com/whatsapp.php?phone=977${phone}&text=${encoded}&apikey=${process.env.CALLMEBOT_API_KEY}`
+    https.get(url, (res) => {
+      res.resume()            // drain the response so the socket closes cleanly
+      resolve()
+    }).on('error', () => resolve())   // never throw — notifications are best-effort
+  })
+}
 
 // GET /api/products — all products, optionally filter by category
 const getProducts = async (req, res) => {
@@ -51,12 +66,43 @@ const createProduct = async (req, res) => {
 // PATCH /api/products/:id — update availability or slots
 const updateProduct = async (req, res) => {
   try {
+    // Fetch the current document BEFORE updating so we can detect the
+    // available: false → true transition
+    const before = await Product.findById(req.params.id)
+    if (!before) return res.status(404).json({ message: 'Product not found' })
+
     const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
     })
-    if (!product) return res.status(404).json({ message: 'Product not found' })
+
     res.json(product)
+
+    // ── Auto-notify waitlist on "goes live" transition ─────────
+    const goingLive = req.body.available === true && before.available === false
+    if (!goingLive) return
+
+    // Fetch unnotified waitlist entries (don't block the response)
+    const entries = await Waitlist.find({ product: req.params.id, notified: false })
+    if (!entries.length) return
+
+    const productName  = product.name
+    const productBrand = product.brand
+
+    // Queue one message per entry, 1 second apart (CallMeBot rate limit)
+    entries.forEach((entry, i) => {
+      setTimeout(async () => {
+        const msg =
+          `Hi ${entry.name}! 🔥 ${productBrand} ${productName} is now LIVE on Wearvana Nepal! ` +
+          `Pre-order before slots run out: https://wearvana.vercel.app`
+
+        await sendWhatsApp(entry.phone, msg)
+
+        // Mark as notified after the message is sent
+        await Waitlist.findByIdAndUpdate(entry._id, { notified: true })
+      }, i * 1000)
+    })
+
   } catch (err) {
     res.status(400).json({ message: 'Validation error', error: err.message })
   }
