@@ -112,3 +112,39 @@ html[data-theme="light"] .field-input {
 }
 html[data-theme="light"] .field-input:focus { border-color: #C0231E !important; }
 html[data-theme="light"] .field-input::placeholder { color: #AAAAAA !important; }
+
+/* --- Admin / modal inputs (Tailwind hex classes on bg/text) --- */
+html[data-theme="light"] input[class*="bg-\[#0A0A0A\]"],
+html[data-theme="light"] input[class*="bg-\[#1C1C1C\]"],
+html[data-theme="light"] textarea[class*="bg-\[#0A0A0A\]"],
+html[data-theme="light"] textarea[class*="bg-\[#1C1C1C\]"],
+html[data-theme="light"] select[class*="bg-\[#0A0A0A\]"],
+html[data-theme="light"] select[class*="bg-\[#1C1C1C\]"] {
+  background-color: #FAFAFA !important;
+  color: #111111 !important;
+}
+html[data-theme="light"] input::placeholder,
+html[data-theme="light"] textarea::placeholder { color: #AAAAAA !important; }
+
+/* --- Dark overlays / backdrops --- */
+html[data-theme="light"] .bg-black\/60  { background-color: rgba(0,0,0,0.25) !important; }
+html[data-theme="light"] .bg-black\/70  { background-color: rgba(0,0,0,0.30) !important; }
+html[data-theme="light"] .bg-black\/80  { background-color: rgba(0,0,0,0.40) !important; }
+
+/* --- Slide-in panels (WaitlistPanel, ReviewManager) --- */
+html[data-theme="light"] .bg-\[\#111111\].border-l { background-color: #FFFFFF !important; }
+
+/* --- Sold-out overlay on product cards --- */
+html[data-theme="light"] .bg-black\/60.flex.items-center { background-color: rgba(255,255,255,0.80) !important; }
+
+/* --- Blog / article pages --- */
+html[data-theme="light"] .prose { color: #333333 !important; }
+
+/* --- Announcement banner --- */
+html[data-theme="light"] .bg-\[\#C0231E\] { background-color: #C0231E !important; }
+
+/* --- Skeleton loaders --- */
+html[data-theme="light"] .animate-pulse .bg-\[\#1C1C1C\] { background-color: #E5E5E5 !important; }
+
+/* --- Dashed borders (empty states) --- */
+html[data-theme="light"] .border-dashed.border-\[\#242424\] { border-color: #CCCCCC !important; }

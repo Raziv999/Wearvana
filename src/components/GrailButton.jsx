@@ -2,6 +2,7 @@
 
 import { Heart } from 'lucide-react'
 import { useGrailList } from '@/hooks/useGrailList'
+import { trackEvent } from './GoogleAnalytics'
 
 export default function GrailButton({ product }) {
   const { isInGrail, toggleGrail, mounted } = useGrailList()
@@ -23,7 +24,15 @@ export default function GrailButton({ product }) {
       onClick={(e) => {
         e.preventDefault()
         e.stopPropagation()
+        const willSave = !saved
         toggleGrail(product)
+        if (willSave) {
+          trackEvent('add_to_wishlist', {
+            currency: 'NPR',
+            value: product.price,
+            items: [{ item_id: product._id, item_name: product.name, item_brand: product.brand }],
+          })
+        }
       }}
       aria-label={saved ? 'Remove from Grail List' : 'Save to Grail List'}
       className={`w-8 h-8 flex items-center justify-center transition-all duration-200 active:scale-90 ${

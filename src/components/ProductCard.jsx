@@ -7,6 +7,7 @@ import { MessageCircle, Bell } from 'lucide-react'
 import GrailButton from './GrailButton'
 import { clImage } from '@/lib/cloudinary'
 import WaitlistModal from './WaitlistModal'
+import { trackEvent } from './GoogleAnalytics'
 
 // Replace with your actual WhatsApp business number (with country code, no +)
 const WA_NUMBER = '9779705477470'
@@ -53,7 +54,13 @@ export default function ProductCard({ product }) {
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#C0231E] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out z-10" />
 
       {/* Product image — whole area links to product page */}
-      <Link href={`/product/${product.slug || product._id}`} className={`relative aspect-square bg-gradient-to-br ${gradient} overflow-hidden block`}>
+      <Link
+        href={`/product/${product.slug || product._id}`}
+        onClick={() => trackEvent('select_item', {
+          items: [{ item_id: product._id, item_name: product.name, item_brand: product.brand, price: product.price }],
+        })}
+        className={`relative aspect-square bg-gradient-to-br ${gradient} overflow-hidden block`}
+      >
 
         {/* Placeholder — only visible when no image */}
         {!product.image && (

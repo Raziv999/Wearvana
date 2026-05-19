@@ -3,6 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import ProductCard from './ProductCard'
 import { Search, X, ChevronDown, SlidersHorizontal } from 'lucide-react'
+import { trackEvent } from './GoogleAnalytics'
 
 // ── Brand silhouette map (real sneaker store structure) ───────
 
@@ -326,6 +327,7 @@ export default function FilterableGrid({ products }) {
                     e.preventDefault()
                     setSearch(s.label)
                     setShowSuggestions(false)
+                    trackEvent('search', { search_term: s.label })
                   }}
                   className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-[#1C1C1C] transition-colors group"
                 >
