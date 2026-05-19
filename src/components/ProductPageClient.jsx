@@ -109,7 +109,7 @@ export default function ProductPageClient({ product }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16 items-start">
 
           {/* LEFT — Gallery (sticky on desktop so it stays visible while scrolling details) */}
-          <div className="md:sticky md:top-6">
+          <div className="md:sticky md:top-6 isolate">
             <ProductGallery product={product} gradient={gradient} accent={accent} />
           </div>
 
