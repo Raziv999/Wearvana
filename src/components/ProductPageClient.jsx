@@ -63,8 +63,8 @@ export default function ProductPageClient({ product }) {
   const accent   = BRAND_ACCENT[product.brand]   ?? '#C0231E'
 
   const waMessage = selectedSize
-    ? `Hi Wearvana! I want to pre-order the ${product.name} (${product.colorway}) in size ${selectedSize}. Is it available?`
-    : `Hi Wearvana! I'm interested in pre-ordering the ${product.name} (${product.colorway}). Can you check availability?`
+    ? `Hi Wearvana! I want to pre-order:\n\n👟 ${product.brand} ${product.name}\n🎨 ${product.colorway}\n📏 Size: ${selectedSize}\n💵 NPR ${product.price?.toLocaleString()}${product.image ? `\n\n📸 ${product.image}` : ''}\n\nIs it available?`
+    : `Hi Wearvana! I'm interested in pre-ordering:\n\n👟 ${product.brand} ${product.name}\n🎨 ${product.colorway}${product.image ? `\n\n📸 ${product.image}` : ''}\n\nCan you check availability?`
 
   const waLink = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(waMessage)}`
 
